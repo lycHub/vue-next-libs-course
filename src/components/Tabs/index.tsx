@@ -1,12 +1,19 @@
-import {defineComponent, onMounted, provide, ref} from 'vue';
+import {defineComponent, onMounted, provide, ref, watch} from 'vue';
 import './index.scss';
 import {TabContext, TabPaneContext, TabsKey} from "./types";
 
 export default defineComponent({
   name: "ATabs",
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
   setup(props, { emit, slots }) {
     const panels = ref<TabPaneContext[]>([]);
-    const currentTabName = ref('');
+    const currentTabName = ref(props.modelValue);
     const addPane = (pane: TabPaneContext) => {
       panels.value.push(pane);
     }
@@ -31,15 +38,26 @@ export default defineComponent({
     }
     onMounted(() => {
       if (!currentTabName.value && panels.value.length) {
-        currentTabName.value = panels.value[0].name;
+        emit('update:modelValue', panels.value[0].name);
       }
       updatePaneVisible();
     });
+    watch(() => props.modelValue, newVal => {
+      currentTabName.value = newVal;
+      updatePaneVisible();
+    });
+    const tabClick = (name: string) => {
+      if (name !== currentTabName.value) {
+        emit('update:modelValue', name);
+      }
+    }
     const renderNavs = () => {
       return panels.value.map(item => {
         const extraCls = item.name === currentTabName.value ? 'active' : '';
-        return <div class={ 'ant-tab-pane ' + extraCls }>{ item.name }</div>
-      })
+        return <div class={ 'ant-tab-pane ' + extraCls } onClick={ tabClick.bind(null, item.name) }>
+          { item.titleSlot ? item.titleSlot(item.name) : item.name }
+        </div>
+      });
     }
     return () => {
       return (

@@ -1,7 +1,10 @@
+import { Slot } from "vue";
+
 const TabsKey = 'TabsKey';
 
 interface TabPaneContext {
   name: string;
+  titleSlot?: Slot;
   changeShow(visible: boolean): void;
 }
 
