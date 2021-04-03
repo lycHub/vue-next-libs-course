@@ -1,8 +1,11 @@
-import Input from './components/Input/index';
 import { App } from "vue";
+import Input from './components/Input/index';
+import FormItem from './components/Form/FormItem';
+
 
 const components = [
-  Input
+  Input,
+  FormItem
 ]
 
 export default function (app: App) {

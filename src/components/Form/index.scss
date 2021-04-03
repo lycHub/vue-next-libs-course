@@ -1,0 +1,32 @@
+.#{$ant-pre}form-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 26px;
+  .item-label {
+    display: inline-block;
+    margin-right: 10px;
+    text-align: right;
+    white-space: nowrap;
+    color: $text-color;
+    vertical-align: middle;
+  }
+  .item-content {
+    position: relative;
+    .item-error {
+      position: absolute;
+      color: $error-color;
+      font-size: $font-size-base;
+      padding-top: 4px;
+    }
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
+}

@@ -7,6 +7,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "async-validator": "^3.5.1",
     "core-js": "^3.6.5",
     "vue": "^3.0.0"
   },
