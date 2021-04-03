@@ -1,18 +1,18 @@
 <template>
   <div class="app">
     <div class="app-container">
-      <form-demo />
+      <tabs-demo />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import FormDemo from './components/Form/demo.vue';
+import TabsDemo from './components/Tabs/demo.vue';
 export default defineComponent({
   name: 'App',
   components: {
-    FormDemo
+    TabsDemo
   }
 });
 </script>

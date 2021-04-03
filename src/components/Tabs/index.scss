@@ -1,0 +1,20 @@
+.#{$ant-pre}tabs {
+  position: relative;
+  .navs {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    .ant-tab-pane {
+      flex-shrink: 0;
+      padding: 10px 15px;
+      text-align: center;
+      height: 32px;
+      line-height: 32px;
+      cursor: pointer;
+      transition: color 0.2s ease-in-out;
+      &.active, &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+}

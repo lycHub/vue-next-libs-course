@@ -1,13 +1,15 @@
 import { App } from "vue";
 import Input from './components/Input';
-import AForm from './components/Form';
+import Form from './components/Form';
 import FormItem from './components/Form/FormItem';
+import Tabs from './components/Tabs';
 
 
 const components = [
   Input,
   FormItem,
-  AForm
+  Form,
+  Tabs
 ]
 
 export default function (app: App) {
