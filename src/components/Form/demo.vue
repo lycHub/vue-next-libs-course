@@ -15,9 +15,8 @@
 </template>
 
 <script lang="tsx">
-  import {defineComponent, reactive, ref} from 'vue';
-  import {RuleItem} from "async-validator";
-  import {AntRuleItem, FormContext} from "@/components/Form/types";
+  import {defineComponent, reactive, ref} from 'vue'
+  import {FormContext} from "./types";
   export default defineComponent({
     name: "FormDemo",
     setup(props, {emit}) {
@@ -31,7 +30,10 @@
           { required: true, message: '请输入姓名', trigger: 'blur' },
           { max: 6, message: '不能超过6位', trigger: 'blur' }
         ],
-        password: { min: 6, message: '最少6位', trigger: 'blur' }
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, message: '最少6位', trigger: 'blur' }
+        ]
       });
       const AForm = ref<FormContext | null>(null);
       const submit = () => {

@@ -1,6 +1,6 @@
 import {defineComponent, inject} from 'vue';
 import './index.scss';
-import {FormItemContext, FormItemKey} from "@/components/Form/types";
+import {FormItemContext, FormItemKey} from "../Form/types";
 
 export default defineComponent({
   name: "AInput",

@@ -9,9 +9,14 @@ interface FormContext {
   model: Record<string, any>;
   rules: AntFormRules;
   validate: validateFunc;
+  addItem(item: Partial<FormItemContext>): void;
+  removeItem(id: string): void;
 }
 
 interface FormItemContext {
+  id: string;
+  prop: string;
+  validate: (value: string) => Promise<boolean | ErrorList>
   handlerControlChange(value: string): void;
   handlerControlBlur(value: string): void;
 }
