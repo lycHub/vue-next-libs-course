@@ -1,7 +1,6 @@
-import {defineComponent, PropType, provide, ref} from 'vue';
-import './index.scss';
-import {AntRuleItem, FormItemKey, ValidTrigger} from "@/components/Form/types";
-import Schema from 'async-validator';
+import {defineComponent, inject, PropType, provide, ref} from 'vue';
+import {AntRuleItem, FormContext, FormItemContext, FormItemKey, FormKey, ValidTrigger} from "@/components/Form/types";
+import Schema, {ErrorList} from 'async-validator';
 
 export default defineComponent({
   name: "AFormItem",
@@ -14,23 +13,21 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    rules: {
-      type: [Object, Array] as PropType<AntRuleItem | AntRuleItem[]>,
-      default: () => ({})
-    }
+    rules: [Object, Array] as PropType<AntRuleItem | AntRuleItem[]>
   },
   setup(props, {emit, slots}) {
     const errMsg = ref('');
+    const parent = inject<FormContext>(FormKey);
     const getRules = (trigger: ValidTrigger): AntRuleItem[] => {
-      const rules = props.rules;
-      const ruleArr = Array.isArray(rules) ? rules : [rules];
-      return ruleArr.filter(item => {
-        const itemTrigger = item?.trigger || 'change';
-        return itemTrigger === trigger;
-      });
+      const rules = props.rules || parent?.rules[props.prop];
+      if (rules) {
+        const ruleArr = Array.isArray(rules) ? rules : [rules];
+        return ruleArr.filter(item => item.trigger === trigger);
+      }
+      return [];
     }
 
-    const validate = (value: string, rules: AntRuleItem[]): Promise<any> => {
+    const validate = (value: string, rules: AntRuleItem[]): Promise<boolean | ErrorList> => {
       if (rules && props.prop) {
         // console.log('rules', rules);
         const schema = new Schema({ [props.prop]: rules });
@@ -56,7 +53,7 @@ export default defineComponent({
         validate(value, trueRules);
       }
     }
-    provide(FormItemKey, {
+    provide<FormItemContext>(FormItemKey, {
       handlerControlChange,
       handlerControlBlur
     });
