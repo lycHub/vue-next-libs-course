@@ -13,6 +13,7 @@ export default defineComponent({
     },
     rules: Object as PropType<AntFormRules>
   },
+  emits: ['validate'],
   setup(props, { emit, slots }) {
     const formItems: FormItemContext[] = [];
     const addItem = (item: FormItemContext) => {
@@ -42,20 +43,26 @@ export default defineComponent({
         if (callback) {
           callback(true);
         }
+        emit('validate', true);
         return Promise.resolve(true);
       }).catch(errors => {
         if (callback) {
-          callback(false)
+          callback(errors)
         }
+        emit('validate', errors);
         return Promise.reject(errors);
       })
     }
     useExpose<{ validate: validateFunc }>({ validate });
+    const onSubmit = (event: Event) => {
+      event.preventDefault();
+      validate();
+    }
     return () => {
       return (
-        <div class="ant-form">
+        <form class="ant-form" onSubmit={ onSubmit }>
           { slots.default!() }
-        </div>
+        </form>
       );
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="demo-box">
-    <a-form :model="formValues" :rules="formRules" ref="AForm">
+    <a-form :model="formValues" :rules="formRules" ref="AForm" @validate="handleValidate">
       <a-form-item label="姓名：" prop="name">
         <a-input v-model="formValues.name" placeholder="请输入姓名" />
       </a-form-item>
@@ -8,7 +8,7 @@
         <a-input v-model="formValues.password" type="password" placeholder="请输入姓名" />
       </a-form-item>
       <a-form-item>
-        <button @click="submit">提交</button>
+        <button>提交</button>
       </a-form-item>
     </a-form>
   </div>
@@ -17,6 +17,7 @@
 <script lang="tsx">
   import {defineComponent, reactive, ref} from 'vue'
   import {FormContext} from "./types";
+  import {ErrorList} from "async-validator";
   export default defineComponent({
     name: "FormDemo",
     setup(props, {emit}) {
@@ -41,12 +42,16 @@
           console.log('valid', valid);
         });
       }
+      const handleValidate = (valid: boolean | ErrorList) => {
+        console.log('handleValidate', valid);
+      }
       return {
         text,
         formValues,
         formRules,
         submit,
-        AForm
+        AForm,
+        handleValidate
       }
     }
   });
