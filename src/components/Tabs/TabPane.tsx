@@ -12,9 +12,13 @@ export default defineComponent({
   setup(props, { emit, slots }) {
     const parent = inject<TabContext>(TabsKey);
     const show = ref(false);
+    const changeShow = (visible: boolean) => {
+      show.value = visible;
+    }
     onMounted(() => {
       parent?.addPane({
-        name: props.name
+        name: props.name,
+        changeShow
       })
     });
     onBeforeUnmount(() => {

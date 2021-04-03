@@ -1,4 +1,4 @@
-import {defineComponent, provide, ref} from 'vue';
+import {defineComponent, onMounted, provide, ref} from 'vue';
 import './index.scss';
 import {TabContext, TabPaneContext, TabsKey} from "./types";
 
@@ -6,7 +6,7 @@ export default defineComponent({
   name: "ATabs",
   setup(props, { emit, slots }) {
     const panels = ref<TabPaneContext[]>([]);
-    const currentTabName = ref('TabTwo');
+    const currentTabName = ref('');
     const addPane = (pane: TabPaneContext) => {
       panels.value.push(pane);
     }
@@ -22,10 +22,23 @@ export default defineComponent({
       addPane,
       removePane
     });
+    const updatePaneVisible = () => {
+      if (panels.value.length) {
+        panels.value.forEach(item => {
+          item.changeShow(item.name === currentTabName.value);
+        })
+      }
+    }
+    onMounted(() => {
+      if (!currentTabName.value && panels.value.length) {
+        currentTabName.value = panels.value[0].name;
+      }
+      updatePaneVisible();
+    });
     const renderNavs = () => {
-      console.log('renderNavs panels', panels);
       return panels.value.map(item => {
-        return <div class="ant-tab-pane">{ item.name }</div>
+        const extraCls = item.name === currentTabName.value ? 'active' : '';
+        return <div class={ 'ant-tab-pane ' + extraCls }>{ item.name }</div>
       })
     }
     return () => {

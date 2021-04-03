@@ -2,6 +2,7 @@ const TabsKey = 'TabsKey';
 
 interface TabPaneContext {
   name: string;
+  changeShow(visible: boolean): void;
 }
 
 interface TabContext {
