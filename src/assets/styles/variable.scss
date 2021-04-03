@@ -5,9 +5,13 @@ $dash-border-color: #f0f0f0;
 $primary-color: #2d8cf0;
 $assist-color: #bae7ff;
 $disable-color: #c5c8ce;
-$text-color: #e45847;
+$text-color: #333;
+$error-color: #e44233;
 
 $font-size-base: 14px;
 $font-size-mid: $font-size-base + 2;
 $font-size-large: $font-size-base + 4;
 $font-size-huge: $font-size-base + 10;
+
+
+$ant-pre: 'ant-';

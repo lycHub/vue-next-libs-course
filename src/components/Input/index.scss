@@ -1,0 +1,30 @@
+.#{$ant-pre}field-wrap {
+  display: inline-block;
+  width: 100%;
+  .#{$ant-pre}field {
+    font-variant: tabular-nums;
+    font-feature-settings: "tnum";
+    display: inline-block;
+    width: 100%;
+    height: 32px;
+    padding: 4px 11px;
+    color: rgba(0,0,0,.65);
+    font-size: $font-size-base;
+    line-height: 1.5;
+    background-color: $white-color;
+    background-image: none;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    transition: all .2s ease-in-out;
+    outline: none;
+    &:focus {
+      border-color: $primary-color;
+    }
+  }
+  &.error {
+    .#{$ant-pre}field {
+      border-color: $error-color;
+    }
+  }
+}
+
