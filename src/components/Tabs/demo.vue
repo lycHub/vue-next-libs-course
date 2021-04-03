@@ -1,9 +1,9 @@
 <template>
   <div class="demo-box">
     <a-tabs>
-      <a-tab-panel name="TabOne">Content 1</a-tab-panel>
-      <a-tab-panel name="TabTwo">Content 2</a-tab-panel>
-      <a-tab-panel name="TabThree">Content 3</a-tab-panel>
+      <a-tab-pane name="TabOne">Content 1</a-tab-pane>
+      <a-tab-pane name="TabTwo">Content 2</a-tab-pane>
+      <a-tab-pane name="TabThree">Content 3</a-tab-pane>
     </a-tabs>
   </div>
 </template>
