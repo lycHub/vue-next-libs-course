@@ -11,7 +11,12 @@ export default defineComponent({
       return (
         <div class="ant-tree-wrap">
           <div class="ant-tree">
-            ant-tree
+            <div class="ant-tree-node">
+              <div class="tree-content">aaa</div>
+            </div>
+            <div class="ant-tree-node">
+              <div class="tree-content">bbb</div>
+            </div>
           </div>
         </div>
       );

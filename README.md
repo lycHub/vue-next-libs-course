@@ -1,19 +1,14 @@
-# vue-next-libs
+# vue-next-libs-course
 
-## Project setup
-```
-npm install
-```
+## 视频教程
+[vue3 + ts 实操](https://www.bilibili.com/video/BV1x64y1S7Ff)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+### jsx or template ?
+如果你没有特别喜欢某一种写法，那么只有一个原则：
 
-### Compiles and minifies for production
-```
-npm run build
-```
+template优先，template不好写再用jsx
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+因为template可读性比jsx好很多，而且ts类型提示也很不错，
+
+尤其官方推出了vscode插件volar，能让template达到tsx一样的类型提示效果
+

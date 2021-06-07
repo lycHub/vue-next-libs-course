@@ -5,7 +5,7 @@
   display: inline-block;
   width: 100%;
   user-select: none;
-  #{$ant-pre}tree {
+  .#{$ant-pre}tree {
     .#{$ant-pre}tree-node {
       padding: 4px 0;
       line-height: normal;
