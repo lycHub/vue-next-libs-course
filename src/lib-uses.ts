@@ -4,6 +4,7 @@ import Form from './components/Form';
 import FormItem from './components/Form/FormItem';
 import Tabs from './components/Tabs';
 import TabPane from './components/Tabs/TabPane';
+import ATree from './components/Tree';
 
 
 const components = [
@@ -11,7 +12,8 @@ const components = [
   FormItem,
   Form,
   Tabs,
-  TabPane
+  TabPane,
+  ATree
 ]
 
 export default function (app: App) {
