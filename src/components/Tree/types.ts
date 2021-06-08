@@ -7,7 +7,7 @@ type nodeKey = string | number; // 唯一索引
 interface TreeNodeOptions {
   nodeKey: nodeKey;
   name: string;
-  level?: number;
+  level?: number; // 控制缩进
   loading?: boolean;
   disabled?: boolean;
   expanded?: boolean;
@@ -18,5 +18,8 @@ interface TreeNodeOptions {
   parentKey?: nodeKey | null;
 }
 
+// 组件内部用的
+type RequiredTreeNodeOptions = Required<TreeNodeOptions>;
 
-export { TreeNodeOptions, nodeKey };
+
+export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions };

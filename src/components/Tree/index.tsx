@@ -1,10 +1,14 @@
-import {defineComponent} from 'vue';
+import {defineComponent, PropType} from 'vue';
 import './index.scss';
+import {TreeNodeOptions} from "./types";
 
 export default defineComponent({
   name: "ATree",
   props: {
-
+    source: {
+      type: Array as PropType<TreeNodeOptions[]>,
+      default: () => []
+    }
   },
   setup(props, { emit }) {
     return () => {
@@ -14,6 +18,7 @@ export default defineComponent({
             <div class="ant-tree-node">
               <div class="tree-content">aaa</div>
             </div>
+
             <div class="ant-tree-node">
               <div class="tree-content">bbb</div>
             </div>
