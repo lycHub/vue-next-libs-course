@@ -11,9 +11,8 @@
       line-height: normal;
       font-size: $font-size-base;
       cursor: pointer;
-      transition: all .2s ease-in-out;
       &:hover {
-        color: $primary-color;
+        //background-color: $bg-prev-color;
       }
       .node-arrow {
         display: inline-block;
@@ -41,6 +40,9 @@
           color: #515a6e;
           white-space: nowrap;
           transition: background-color .2s;
+          &:hover {
+            color: $primary-color;
+          }
           &.selected {
             background-color: $assist-color;
           }

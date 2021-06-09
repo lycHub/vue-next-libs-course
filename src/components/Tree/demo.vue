@@ -18,6 +18,7 @@
         name: nodeKey,
         children: [],
         hasChildren: true,
+        // expanded: true
         // disabled: i % 2 === 0
       };
 
@@ -39,7 +40,6 @@
       const list = ref<TreeNodeOptions[]>([]);
       onMounted(() => {
         list.value = recursion();
-        console.log('list', list.value);
       });
       return {
         list
