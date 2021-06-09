@@ -1,6 +1,7 @@
 import {defineComponent, PropType, watch, ref} from 'vue';
 import './index.scss';
 import {RequiredTreeNodeOptions, TreeNodeOptions} from "./types";
+import ATreeNode from './node';
 
 function flattenTree(source: TreeNodeOptions[]): RequiredTreeNodeOptions[] {
   const result: RequiredTreeNodeOptions[] = [];
@@ -49,17 +50,14 @@ export default defineComponent({
       return (
         <div class="ant-tree-wrap">
           <div class="ant-tree">
-            <div class="ant-tree-node">
-              <div class="tree-content node-text">
-                <span class="node-title">aaa</span>
-              </div>
-            </div>
-
-            <div class="ant-tree-node">
-              <div class="tree-content node-text">
-                <span class="node-title">bbb</span>
-              </div>
-            </div>
+            {
+              flatList.value.map((node, index) => {
+                return <ATreeNode
+                  key={ node.nodeKey }
+                  node={ node }
+                />
+              })
+            }
           </div>
         </div>
       );
