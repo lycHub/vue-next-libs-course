@@ -16,7 +16,7 @@
       const treeNode: TreeNodeOptions  = {
         nodeKey,
         name: nodeKey,
-        selected: nodeKey === '0-0',
+        // children: [],
         hasChildren: true
       };
       list.push(treeNode);
@@ -39,7 +39,6 @@
           const treeNode: TreeNodeOptions  = {
             nodeKey,
             name: nodeKey,
-            disabled: i % 2 === 0,
             children: [],
             hasChildren: true
           };
