@@ -1,7 +1,7 @@
 <template>
   <div class="demo-box">
     <h3>tree demo</h3>
-    <a-tree :source="list" />
+    <a-tree :source="list" :lazyLoad="lazyLoad" />
   </div>
 </template>
 
@@ -9,25 +9,16 @@
   import {defineComponent, onMounted, ref} from 'vue';
   import {TreeNodeOptions} from "./types";
 
-  function recursion(path = '0', level = 2): TreeNodeOptions[] {
+  function recursion(path = '0'): TreeNodeOptions[] {
     const list = [];
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 2; i += 1) {
       const nodeKey = `${path}-${i}`;
       const treeNode: TreeNodeOptions  = {
         nodeKey,
         name: nodeKey,
-        children: [],
-        hasChildren: true,
-        // expanded: true
-        // disabled: i % 2 === 0
+        // children: [],
+        hasChildren: true
       };
-
-      if (level > 0) {
-        treeNode.children = recursion(nodeKey, level - 1);
-      } else {
-        treeNode.hasChildren = false;
-      }
-
       list.push(treeNode);
     }
     return list;
@@ -41,8 +32,25 @@
       onMounted(() => {
         list.value = recursion();
       });
+      const lazyLoad = (node: TreeNodeOptions, callback: (children: TreeNodeOptions[]) => void) => {
+        const result: TreeNodeOptions[] = [];
+        for (let i = 0; i < 2; i += 1) {
+          const nodeKey = `${node.nodeKey}-${i}`;
+          const treeNode: TreeNodeOptions  = {
+            nodeKey,
+            name: nodeKey,
+            children: [],
+            hasChildren: true
+          };
+          result.push(treeNode);
+        }
+        setTimeout(() => {
+          callback(result);
+        }, 1000);
+      }
       return {
-        list
+        list,
+        lazyLoad
       }
     }
   });

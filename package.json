@@ -9,9 +9,11 @@
   "dependencies": {
     "async-validator": "^3.5.1",
     "core-js": "^3.6.5",
+    "lodash": "^4.17.21",
     "vue": "^3.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.170",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
