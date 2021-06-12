@@ -1,7 +1,8 @@
 import {computed, defineComponent, PropType, ref, Slot} from 'vue';
 import ACheckbox from './Checkbox';
-import {CustomEventFuncType, renderFunc, RequiredTreeNodeOptions} from "./types";
+import {renderFunc, RequiredTreeNodeOptions} from "./types";
 import RenderNode from './render';
+import {CustomEventFuncType} from "../utils/types";
 
 export default defineComponent({
   name: "ATreeNode",

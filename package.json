@@ -1,10 +1,13 @@
 {
   "name": "vue-next-libs",
   "version": "0.1.0",
-  "private": true,
+  "main": "lib/vue-next-libs.common.js",
+  "files": ["lib"],
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build:demo": "vue-cli-service build",
+    "build:lib": "vue-cli-service build --target lib --dest lib ./src/components/index.ts",
+    "build:types": "tsc --project src/components/tsconfig.json"
   },
   "dependencies": {
     "async-validator": "^3.5.1",

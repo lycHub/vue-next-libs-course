@@ -38,6 +38,4 @@ type RequiredTreeNodeOptions = Required<TreeNodeOptions>;
 
 type renderFunc = (node: RequiredTreeNodeOptions) => JSX.Element;
 
-type CustomEventFuncType<T> = PropType<(arg: T) => void>;
-
-export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions, renderFunc, CustomEventFuncType, TreeInstance, TreeNodeInstance };
+export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions, renderFunc, TreeInstance, TreeNodeInstance };
