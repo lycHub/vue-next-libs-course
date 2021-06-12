@@ -21,5 +21,7 @@ interface TreeNodeOptions {
 // 组件内部用的
 type RequiredTreeNodeOptions = Required<TreeNodeOptions>;
 
+type renderFunc = (node: RequiredTreeNodeOptions) => JSX.Element;
 
-export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions };
+
+export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions, renderFunc };

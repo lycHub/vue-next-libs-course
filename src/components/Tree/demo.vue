@@ -1,7 +1,12 @@
 <template>
   <div class="demo-box">
     <h3>tree demo</h3>
-    <a-tree :source="list" :lazyLoad="lazyLoad" />
+    <a-tree :source="list" :lazyLoad="lazyLoad" :render="renderNode">
+      <template #icon="loading">
+        <i v-if="loading" class="iconfont iconcustom-icon ico-loading"></i>
+        <i v-else class="iconfont iconzhankai"></i>
+      </template>
+    </a-tree>
   </div>
 </template>
 
@@ -49,9 +54,13 @@
           callback(result);
         }, 1000);
       }
+      const renderNode = (node: TreeNodeOptions) => {
+        return <div style="padding: 0 4px;"><b style="color: #f60;">{ node.name }</b></div>
+      }
       return {
         list,
-        lazyLoad
+        lazyLoad,
+        renderNode
       }
     }
   });

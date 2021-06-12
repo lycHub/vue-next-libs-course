@@ -1,5 +1,6 @@
-import {computed, defineComponent, PropType, ref} from 'vue';
-import {RequiredTreeNodeOptions} from "./types";
+import {computed, defineComponent, PropType, ref, Slot} from 'vue';
+import {renderFunc, RequiredTreeNodeOptions} from "./types";
+import RenderNode from './render';
 
 type CustomEventFuncType<T> = PropType<(arg: T) => void>;
 
@@ -10,12 +11,14 @@ export default defineComponent({
       type: Object as PropType<RequiredTreeNodeOptions>,
       required: true
     },
+    iconSlot: Function as PropType<Slot>,
+    render: Function as PropType<renderFunc>,
     onToggleExpand: Function as CustomEventFuncType<RequiredTreeNodeOptions>,
     onSelectChange: Function as CustomEventFuncType<RequiredTreeNodeOptions>,
   },
   emits: ['toggle-expand', 'select-change', 'check-change'],
   setup(props, { emit }) {
-    const { node } = props;
+    const { node, render, iconSlot } = props;
 
     const textCls = computed(() => {
       let result = 'node-title';
@@ -43,10 +46,17 @@ export default defineComponent({
       return <div class={ ['node-arrow', node.expanded ? 'expanded' : ''] }>
         {
           node.hasChildren
-            ? node.loading
+            ? iconSlot ? iconSlot(node.loading) : node.loading
             ? <i class="iconfont iconloading ico-loading" />
             : <i class="iconfont iconExpand" />
             : null
+        }
+      </div>
+    }
+    const renderContent = (): JSX.Element => {
+      return <div class="node-content node-text" onClick={handleSelect}>
+        {
+          render ? <RenderNode render={ render } node={ node } /> : <span class={textCls.value}>{node.name}</span>
         }
       </div>
     }
@@ -54,9 +64,7 @@ export default defineComponent({
       return (
         <div class="ant-tree-node" onClick={handleExpand} style={{ paddingLeft: node.level * 18 + 'px' }}>
           { renderArrow() }
-          <div class="node-content node-text" onClick={ handleSelect }>
-            <span class={textCls.value}>{ node.name }</span>
-          </div>
+          { renderContent() }
         </div>
       );
     }

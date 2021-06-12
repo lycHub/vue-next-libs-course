@@ -1,7 +1,7 @@
 import {defineComponent, PropType, watch, ref} from 'vue';
 import { cloneDeep } from 'lodash';
 
-import {nodeKey, RequiredTreeNodeOptions, TreeNodeOptions} from "./types";
+import {nodeKey, renderFunc, RequiredTreeNodeOptions, TreeNodeOptions} from "./types";
 import ATreeNode from './node';
 import './index.scss';
 
@@ -12,10 +12,11 @@ export default defineComponent({
       type: Array as PropType<TreeNodeOptions[]>,
       default: () => []
     },
+    render: Function as PropType<renderFunc>,
     lazyLoad: Function as PropType<(node: RequiredTreeNodeOptions, callback: (children: TreeNodeOptions[]) => void) => void>
   },
   emits: ['select-change'],
-  setup(props, { emit }) {
+  setup(props, { emit, slots }) {
     // 推导优先，其次范型
     const loading = ref(false);
     const selectedKey = ref<nodeKey>('');
@@ -152,6 +153,8 @@ export default defineComponent({
                 return <ATreeNode
                   key={ node.nodeKey }
                   node={ node }
+                  render={ props.render }
+                  iconSlot={ slots.icon }
                   onToggleExpand={ handleToggleExpand }
                   onSelectChange={ handleSelectChange }
                 />
