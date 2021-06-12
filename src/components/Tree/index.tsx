@@ -1,9 +1,10 @@
 import {defineComponent, PropType, watch, ref} from 'vue';
 import { cloneDeep } from 'lodash';
 
-import {nodeKey, renderFunc, RequiredTreeNodeOptions, TreeNodeOptions} from "./types";
+import {nodeKey, renderFunc, RequiredTreeNodeOptions, TreeNodeInstance, TreeNodeOptions} from "./types";
 import ATreeNode from './node';
 import './index.scss';
+import {updateDownwards, updateUpwards} from "./utils";
 
 export default defineComponent({
   name: "ATree",
@@ -12,11 +13,19 @@ export default defineComponent({
       type: Array as PropType<TreeNodeOptions[]>,
       default: () => []
     },
+    showCheckbox: {
+      type: Boolean,
+      default: false
+    },
+    checkStrictly: {
+      type: Boolean,
+      default: false
+    },
     render: Function as PropType<renderFunc>,
     lazyLoad: Function as PropType<(node: RequiredTreeNodeOptions, callback: (children: TreeNodeOptions[]) => void) => void>
   },
-  emits: ['select-change'],
-  setup(props, { emit, slots }) {
+  emits: ['select-change', 'check-change'],
+  setup(props, { emit, slots, expose }) {
     // 推导优先，其次范型
     const loading = ref(false);
     const selectedKey = ref<nodeKey>('');
@@ -144,6 +153,33 @@ export default defineComponent({
       emit('select-change', node);
     }
 
+    const handleCheckChange = ([checked, node]: [boolean, RequiredTreeNodeOptions]) => {
+      node.checked = checked;
+      if (!props.checkStrictly) { // 父子联动
+        updateDownwards(checked, node);
+        updateUpwards(node, flatList.value);
+      }
+      emit('check-change', node);
+    }
+
+    const nodeRefs = ref<TreeNodeInstance[]>([]);
+    const setNodesRef = (index: number, node: TreeNodeInstance) => {
+      if (node) {
+        nodeRefs.value[index] = node;
+      }
+    }
+    expose({
+      getSelectedNode: (): RequiredTreeNodeOptions | undefined => {
+        return flatList.value.find(item => item.selected);
+      },
+      getCheckedNodes: (): RequiredTreeNodeOptions[] => {
+        return flatList.value.filter(item => item.checked);
+      },
+      getHalfCheckedNodes: (): RequiredTreeNodeOptions[] => {
+        return nodeRefs.value.filter(item => item.halfChecked()).map(item => item.node);
+      }
+    });
+
     return () => {
       return (
         <div class="ant-tree-wrap">
@@ -152,11 +188,15 @@ export default defineComponent({
               flatList.value.map((node, index) => {
                 return <ATreeNode
                   key={ node.nodeKey }
+                  // @ts-ignore
+                  ref={ setNodesRef.bind(null, index) }
                   node={ node }
                   render={ props.render }
                   iconSlot={ slots.icon }
+                  showCheckbox={ props.showCheckbox }
                   onToggleExpand={ handleToggleExpand }
                   onSelectChange={ handleSelectChange }
+                  onCheckChange={ handleCheckChange }
                 />
               })
             }

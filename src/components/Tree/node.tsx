@@ -1,8 +1,7 @@
 import {computed, defineComponent, PropType, ref, Slot} from 'vue';
-import {renderFunc, RequiredTreeNodeOptions} from "./types";
+import ACheckbox from './Checkbox';
+import {CustomEventFuncType, renderFunc, RequiredTreeNodeOptions} from "./types";
 import RenderNode from './render';
-
-type CustomEventFuncType<T> = PropType<(arg: T) => void>;
 
 export default defineComponent({
   name: "ATreeNode",
@@ -11,18 +10,37 @@ export default defineComponent({
       type: Object as PropType<RequiredTreeNodeOptions>,
       required: true
     },
+    showCheckbox: {
+      type: Boolean,
+      default: false
+    },
+    checkStrictly: {
+      type: Boolean,
+      default: false
+    },
     iconSlot: Function as PropType<Slot>,
     render: Function as PropType<renderFunc>,
     onToggleExpand: Function as CustomEventFuncType<RequiredTreeNodeOptions>,
     onSelectChange: Function as CustomEventFuncType<RequiredTreeNodeOptions>,
+    onCheckChange: Function as CustomEventFuncType<[boolean, RequiredTreeNodeOptions]>,
   },
   emits: ['toggle-expand', 'select-change', 'check-change'],
-  setup(props, { emit }) {
-    const { node, render, iconSlot } = props;
+  setup(props, { emit, expose }) {
+    const { node, render, iconSlot, showCheckbox, checkStrictly } = props;
+
+    const halfChecked = computed(() => {
+      let result = false;
+      if (!checkStrictly && node.hasChildren) {
+        const { children } = node;
+        const checkedChildren = children.filter(item => item.checked);
+        result = checkedChildren.length > 0 && checkedChildren.length < children.length;
+      }
+      return result;
+    });
 
     const textCls = computed(() => {
       let result = 'node-title';
-      if (node.selected) {
+      if (node.selected && !showCheckbox) {
         result += ' selected';
       }
       if (node.disabled) {
@@ -42,6 +60,10 @@ export default defineComponent({
       }
     }
 
+    const handleCheckChange = (checked: boolean) => {
+      emit('check-change', [checked, props.node]);
+    }
+
     const renderArrow = (): JSX.Element => {
       return <div class={ ['node-arrow', node.expanded ? 'expanded' : ''] }>
         {
@@ -53,13 +75,28 @@ export default defineComponent({
         }
       </div>
     }
+    const normalContent = (): JSX.Element => {
+      return render ? <RenderNode render={ render } node={ node } /> : <span class={textCls.value}>{node.name}</span>;
+    }
     const renderContent = (): JSX.Element => {
+      if (showCheckbox) {
+        return <ACheckbox
+          class="node-content node-checkbox"
+          disabled={ node.disabled }
+          modelValue={ node.checked }
+          halfChecked={ halfChecked.value }
+          onChange={ handleCheckChange }>
+          { normalContent() }
+        </ACheckbox>
+      }
       return <div class="node-content node-text" onClick={handleSelect}>
-        {
-          render ? <RenderNode render={ render } node={ node } /> : <span class={textCls.value}>{node.name}</span>
-        }
+        { normalContent() }
       </div>
     }
+    expose({
+      node,
+      halfChecked: () => halfChecked.value
+    });
     return () => {
       return (
         <div class="ant-tree-node" onClick={handleExpand} style={{ paddingLeft: node.level * 18 + 'px' }}>

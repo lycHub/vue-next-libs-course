@@ -1,3 +1,5 @@
+import {PropType} from "@vue/runtime-core";
+
 type nodeKey = string | number; // 唯一索引
 
 /*
@@ -18,10 +20,24 @@ interface TreeNodeOptions {
   parentKey?: nodeKey | null;
 }
 
+
+interface TreeInstance {
+  getSelectedNode: () => RequiredTreeNodeOptions | undefined;
+  getCheckedNodes: () => RequiredTreeNodeOptions[];
+  getHalfCheckedNodes: () => RequiredTreeNodeOptions[];
+}
+
+interface TreeNodeInstance {
+  node: RequiredTreeNodeOptions;
+  halfChecked: () => boolean;
+}
+
+
 // 组件内部用的
 type RequiredTreeNodeOptions = Required<TreeNodeOptions>;
 
 type renderFunc = (node: RequiredTreeNodeOptions) => JSX.Element;
 
+type CustomEventFuncType<T> = PropType<(arg: T) => void>;
 
-export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions, renderFunc };
+export { TreeNodeOptions, nodeKey, RequiredTreeNodeOptions, renderFunc, CustomEventFuncType, TreeInstance, TreeNodeInstance };

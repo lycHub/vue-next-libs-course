@@ -1,7 +1,12 @@
 <template>
   <div class="demo-box">
     <h3>tree demo</h3>
-    <a-tree :source="list" :lazyLoad="lazyLoad" :render="renderNode">
+    <div class="bts">
+      <button @click="selectedNode">获取选中节点</button> ｜
+      <button @click="checkedNodes">获取勾选的节点</button> ｜
+      <button @click="halfCheckedNodes">获取半选的节点</button>
+    </div>
+    <a-tree ref="aTree" :source="list" :lazyLoad="lazyLoad" show-checkbox>
       <template #icon="loading">
         <i v-if="loading" class="iconfont iconcustom-icon ico-loading"></i>
         <i v-else class="iconfont iconzhankai"></i>
@@ -12,7 +17,7 @@
 
 <script lang="tsx">
   import {defineComponent, onMounted, ref} from 'vue';
-  import {TreeNodeOptions} from "./types";
+  import {TreeInstance, TreeNodeOptions} from "./types";
 
   function recursion(path = '0'): TreeNodeOptions[] {
     const list = [];
@@ -39,12 +44,12 @@
       });
       const lazyLoad = (node: TreeNodeOptions, callback: (children: TreeNodeOptions[]) => void) => {
         const result: TreeNodeOptions[] = [];
-        for (let i = 0; i < 2; i += 1) {
+        for (let i = 0; i < 3; i += 1) {
           const nodeKey = `${node.nodeKey}-${i}`;
           const treeNode: TreeNodeOptions  = {
             nodeKey,
             name: nodeKey,
-            disabled: i % 2 === 0,
+            // disabled: i % 2 === 0,
             children: [],
             hasChildren: true
           };
@@ -54,13 +59,30 @@
           callback(result);
         }, 1000);
       }
-      const renderNode = (node: TreeNodeOptions) => {
-        return <div style="padding: 0 4px;"><b style="color: #f60;">{ node.name }</b></div>
+
+      const aTree = ref<TreeInstance>();
+      const selectedNode = () => {
+        const node = aTree.value!.getSelectedNode();
+        console.log('selected node', node);
       }
+      
+      const checkedNodes = () => {
+        const nodes = aTree.value!.getCheckedNodes();
+        console.log('checkedNodes', nodes);
+      }
+      
+      const halfCheckedNodes = () => {
+        const nodes = aTree.value!.getHalfCheckedNodes();
+        console.log('halfCheckedNodes', nodes);
+      }
+      
       return {
         list,
         lazyLoad,
-        renderNode
+        aTree,
+        selectedNode,
+        checkedNodes,
+        halfCheckedNodes,
       }
     }
   });
