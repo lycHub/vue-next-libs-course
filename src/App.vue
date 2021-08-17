@@ -12,6 +12,6 @@ import TableDemo from './components/Table/demo.vue';
 <style lang="scss">
   .app-container {
     width: 1000px;
-    margin: 0 auto;
+    margin: 30px auto;
   }
 </style>
