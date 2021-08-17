@@ -1,5 +1,5 @@
 import { defineComponent, PropType } from 'vue';
-import {ColumnOptions, RenderTableHeader} from "./types";
+import {ColumnOptions, TableData, TableRenderFunc} from "./types";
 
 export default defineComponent({
   name: 'RenderCell',
@@ -12,12 +12,17 @@ export default defineComponent({
       type: Number,
       required: true
     },
+    data: {
+      type: Array as PropType<TableData>,
+      default: () => ({})
+    },
     renderFunc: {
-      type: Function as PropType<RenderTableHeader>,
+      type: Function as PropType<TableRenderFunc>,
       required: true
     }
   },
-  setup(props) {
-    return () => props.renderFunc(props.column, props.index);
+  setup({ column, index, data, renderFunc }) {
+    console.log('render data setup', data);
+    return () => renderFunc(column, index, data);
   }
 });

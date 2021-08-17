@@ -1,4 +1,5 @@
-type RenderTableHeader = (col: ColumnOptions, index: number) => JSX.Element;
+type TableData = Record<string, any>;
+type TableRenderFunc = (col: ColumnOptions, index: number, data: TableData) => JSX.Element;
 interface ColumnOptions {
   title: string;
   key: string;
@@ -7,11 +8,9 @@ interface ColumnOptions {
   width: number;
   minWidth: number;
   maxWidth: number;
-  renderHeader: RenderTableHeader;
-  render: () => JSX.Element;
+  renderHeader: TableRenderFunc;
+  render: TableRenderFunc;
 }
-
-type TableData = Record<string, any>;
 
 interface TableStyle {
   width?: string;
@@ -23,4 +22,4 @@ interface CellStyle {
   boxShadow: string;
 }
 
-export { ColumnOptions, TableData, TableStyle, CellStyle, RenderTableHeader };
+export { ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc };
