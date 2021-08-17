@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 4200",
     "build:demo": "vue-cli-service build",
     "build:lib:cli": "vue-cli-service build --target lib --dest lib ./src/components/index.ts",
     "build:esm": "rollup --format esm -c build/rollup.config.js",
@@ -23,7 +23,7 @@
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
-    "vue": "^3.0.0"
+    "vue": "^3.2.3"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "^5.3.0",
@@ -44,7 +44,7 @@
     "sass-loader": "^8.0.2",
     "style-resources-loader": "^1.4.1",
     "typescript": "~4.1.5",
-    "vue": "^3.0.0",
+    "vue": "^3.2.3",
     "vue-cli-plugin-style-resources-loader": "~0.1.5"
   }
 }

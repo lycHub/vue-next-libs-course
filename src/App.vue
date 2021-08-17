@@ -1,20 +1,13 @@
 <template>
   <div class="app">
     <div class="app-container">
-      <tree-demo />
+      <table-demo />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import TreeDemo from './components/Tree/demo.vue';
-export default defineComponent({
-  name: 'App',
-  components: {
-    TreeDemo
-  }
-});
+<script lang="ts" setup>
+import TableDemo from './components/Table/demo.vue';
 </script>
 <style lang="scss">
   .app-container {
