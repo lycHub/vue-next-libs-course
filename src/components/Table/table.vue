@@ -10,7 +10,7 @@
         </table>
       </div>
 
-      <div class="ant-table-section sec-body" :style="bodyStyle" @scroll="handleBodyScroll">
+      <div :class="`ant-table-section sec-body ${ selectMode ? 'select-mode' : '' }`" :style="bodyStyle" @scroll="handleBodyScroll">
         <table class="ant-table" cellSpacing="0" :style="tableStyle">
           <colgroup>
             <col v-for="item of cols" :width="item" />
@@ -100,12 +100,6 @@ export default defineComponent({
       });
     }
 
-    const init = () => {
-      tableData.value = props.data || [];
-      selectedRowIndexes.value = [];
-      setSeparateHeight();
-    }
-
 
     const hfStyle = computed(() => { // 这里本是方法
       const result = { overflow: 'hidden ' };
@@ -178,7 +172,7 @@ export default defineComponent({
     }
 
     const handleRowClick = (row: SelectedRow) => {
-      // console.log('handleRowClick', row);
+      if (props.selectMode !== 'row') return;
       const targetIndexOfSelectedRowIndexes = selectedRowIndexes.value.findIndex(item => item === row.index);
       switch (row.clickType) {
         case 'ctrl':
@@ -194,8 +188,8 @@ export default defineComponent({
           break;
         case 'shift':
           if (selectedRowIndexes.value.length) {
-            const indexes = genIndexesFromRange([selectedRowIndexes.value[0], row.index]);
-            selectedRowIndexes.value = indexes;
+            selectedRowIndexes.value = genIndexesFromRange([selectedRowIndexes.value[0], row.index]);
+            getSelection()!.removeAllRanges();
           } else {
             selectedRowIndexes.value = [row.index];
           }
@@ -204,11 +198,16 @@ export default defineComponent({
           selectedRowIndexes.value = [row.index];
           break;
       }
-      console.log('selectedRowIndexes', selectedRowIndexes.value);
+      // console.log('selectedRowIndexes', selectedRowIndexes.value);
     }
 
+    const init = () => {
+      tableData.value = props.data || [];
+      selectedRowIndexes.value = [];
+      setSeparateHeight();
+    }
     init();
-    watch(() => props.data, newVal => {
+    watch(() => props.data, () => {
       init();
     });
     return {
@@ -258,11 +257,17 @@ export default defineComponent({
                 right: 1px solid $border-color;
               }
             }
+            .table-cell.selected {
+              background-color: $assist-color;
+            }
           }
           .table-row.selected {
             background-color: $assist-color;
           }
         }
+      }
+      .#{$ant-pre}table-section.select-mode {
+        cursor: pointer;
       }
     }
   }
