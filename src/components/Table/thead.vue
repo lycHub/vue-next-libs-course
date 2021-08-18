@@ -16,7 +16,7 @@ import {CellStyle} from "./types";
 import {commonProps, getCellStyle} from "./uses";
 
   export default defineComponent({
-    name: 'ATable',
+    name: 'ATableHead',
     components: { RenderCell },
     props: commonProps,
     setup(props, { emit }) {

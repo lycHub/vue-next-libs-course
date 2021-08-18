@@ -1,26 +1,29 @@
 <template>
   <tbody class="table-body" align="center">
   <tr :class="tableRowCls(index)" v-for="(row, index) of data" :key="row[rowKey]" @click="clickRow($event, index)">
-    <td class="table-cell" v-for="(col, cIndex) of columns" :key="col.title || cIndex" :style="cellStyle(cIndex)">
-      <render-cell v-if="col.render" :render-func="col.render" :column="col" :data="row" :index="index" />
-      <render-slot v-else-if="col.slot" :column="col" :data="row" :index="index" />
-      <span v-else class="cell-text">{{ row[col['key']] }}</span>
-    </td>
+    <cell
+      v-for="(col, cIndex) of columns"
+      :key="col.title || cIndex"
+      :columns="columns"
+      :table-style="tableStyle"
+      :scroll-boundary="scrollBoundary"
+      :data="row"
+      :col-index="cIndex"
+      :index="index" />
   </tr>
   </tbody>
 </template>
 
 <script lang="tsx">
-import {computed, defineComponent, PropType} from 'vue';
-  import RenderCell from './render';
-  import RenderSlot from './slot';
+  import {defineComponent, PropType} from 'vue';
   import {CellStyle, SelectMode, TableData} from "./types";
   import {commonProps, getCellStyle, getClickType} from "./uses";
   import {WrapWithUndefined} from "../utils/types";
+  import Cell from './cell.vue';
 
   export default defineComponent({
-    name: 'ATable',
-    components: { RenderCell, RenderSlot },
+    name: 'ATableBody',
+    components: { Cell },
     props: {
       ...commonProps,
       data: {

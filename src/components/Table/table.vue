@@ -6,7 +6,7 @@
           <colgroup>
             <col v-for="item of cols" :width="item" />
           </colgroup>
-          <table-header :columns="columns" :tableStyle="tableStyle" :scrollBoundary="scrollBoundary" />
+          <a-table-head :columns="columns" :tableStyle="tableStyle" :scrollBoundary="scrollBoundary" />
         </table>
       </div>
 
@@ -15,7 +15,7 @@
           <colgroup>
             <col v-for="item of cols" :width="item" />
           </colgroup>
-          <table-body
+          <a-table-body
             :columns="columns"
             :data="tableData"
             :tableStyle="tableStyle"
@@ -33,8 +33,8 @@
 <script lang="ts">
 import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
 import {orderBy, partition, range, sum, sumBy} from "lodash-es";
-import TableHeader from './thead.vue';
-import TableBody from './tbody.vue';
+import ATableHead from './thead.vue';
+import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
 import {ColumnOptions, SelectedRow, SelectMode, TableData, TableRootKey} from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
@@ -48,7 +48,7 @@ interface TableSectionEls {
 
 export default defineComponent({
   name: 'ATable',
-  components: { TableHeader, TableBody },
+  components: { ATableHead, ATableBody },
   props: {
     columns: {
       type: Array as PropType<ColumnOptions[]>,
