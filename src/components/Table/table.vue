@@ -36,9 +36,11 @@ import {orderBy, partition, range, sum, sumBy} from "lodash-es";
 import ATableHead from './thead.vue';
 import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
-import {ColumnOptions, SelectedRow, SelectMode, TableData, TableRootKey} from "./types";
+import {ClickType, ColumnOptions, SelectedRow, SelectMode, TableData, TableDataOfSelected} from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
 import {genIndexesFromRange} from "../utils/tools";
+import {TableRootKey} from "./injection";
+import {getClickType, getSelectedCellIndex} from "./uses";
 
 interface TableSectionEls {
   head: HTMLElement;
@@ -69,7 +71,6 @@ export default defineComponent({
     selectMode: String as PropType<WrapWithUndefined<SelectMode>>
   },
   setup(props, { emit, slots }) {
-    provide(TableRootKey, slots);
     const tableRootHtml = ref<WrapWithUndefined<HTMLElement>>(undefined);
     const separateHeight = ref(false);
     const colTotalWidth = ref(0);
@@ -80,6 +81,53 @@ export default defineComponent({
 
     // 保存选中的行
     const selectedRowIndexes = ref<number[]>([]);
+
+    // 保存选中的单元格
+    const selectedCells = ref<TableDataOfSelected[]>([]);
+
+    const handleTableCellClick = (cell: TableDataOfSelected, event: MouseEvent) => {
+      if (props.selectMode !== 'cell') return;
+      event.stopPropagation();
+      const clickType = getClickType(event);
+      const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCells.value, cell.x, cell.y);
+      // console.log('targetIndexOfSelectedCells', targetIndexOfSelectedCells);
+      switch (clickType) {
+        case 'ctrl':
+          if (selectedCells.value.length) {
+            if (targetIndexOfSelectedCells > -1) {
+              selectedCells.value.splice(targetIndexOfSelectedCells, 1);
+            } else {
+              selectedCells.value.push(cell);
+            }
+          } else {
+            selectedCells.value = [cell];
+          }
+          break;
+        case 'shift':
+         /* if (selectedRowIndexes.value.length) {
+            selectedRowIndexes.value = genIndexesFromRange([selectedRowIndexes.value[0], row.index]);
+            getSelection()!.removeAllRanges();
+          } else {
+            selectedRowIndexes.value = [row.index];
+          }*/
+          break;
+        default:
+          if (selectedCells.value.length === 1 && targetIndexOfSelectedCells === 0) {
+            selectedCells.value = [];
+          } else {
+            selectedCells.value = [cell];
+          }
+          break;
+      }
+      // console.log('selectedCells', selectedCells);
+    }
+
+    provide(TableRootKey, {
+      rowKey: props.rowKey,
+      slots,
+      selectedCells,
+      handleTableCellClick
+    });
 
     const bodyHeadDom = (): Partial<TableSectionEls> => {
       if (tableRootHtml.value instanceof HTMLElement) {
@@ -195,7 +243,11 @@ export default defineComponent({
           }
           break;
         default:
-          selectedRowIndexes.value = [row.index];
+          if (selectedRowIndexes.value.length === 1 && targetIndexOfSelectedRowIndexes === 0) {
+            selectedRowIndexes.value = [];
+          } else {
+            selectedRowIndexes.value = [row.index];
+          }
           break;
       }
       // console.log('selectedRowIndexes', selectedRowIndexes.value);
@@ -256,6 +308,7 @@ export default defineComponent({
                 bottom: 1px solid $border-color;
                 right: 1px solid $border-color;
               }
+              transition: background-color .2s ease-in-out;
             }
             .table-cell.selected {
               background-color: $assist-color;

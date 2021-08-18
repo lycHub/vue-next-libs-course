@@ -2,7 +2,7 @@
   <div class="demo-box">
 <!--    <p>类型问题：全局组件的属性没提示</p>-->
     <button @click="changeTableData">change table data</button>
-    <a-table :columns="columns" :data="data" :max-height="300" select-mode="cell">
+    <a-table :columns="columns" :data="data" :max-height="300" select-mode="row">
       <template v-slot:age="{ data }">
         <b>{{ data.age }}岁</b>
       </template>

@@ -1,9 +1,9 @@
-import {InjectionKey} from "vue";
-import {Slots} from "@vue/runtime-core";
-
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
 type TableData = Record<string, any>;
+type CellCoordinate = { x: number; y: number };
+
+type TableDataOfSelected = TableData & CellCoordinate;
 
 type TableRenderFuncParams = {
   col: ColumnOptions;
@@ -41,6 +41,4 @@ interface SelectedRow {
   clickType: ClickType;
 }
 
-const TableRootKey: InjectionKey<Slots> = Symbol('Table slots');
-
-export { TableRootKey, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { TableDataOfSelected, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

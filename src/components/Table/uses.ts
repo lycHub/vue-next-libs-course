@@ -1,7 +1,8 @@
 import {computed, PropType} from "vue";
-import {CellStyle, ClickType, ColumnOptions, FixTypes, TableStyle} from "./types";
+import {CellStyle, ClickType, ColumnOptions, FixTypes, TableDataOfSelected, TableStyle} from "./types";
 import {findIndex, findLastIndex, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
+import {WrapWithUndefined} from "../utils/types";
 
 const commonProps = {
   columns: {
@@ -58,5 +59,8 @@ function getClickType(event: MouseEvent): ClickType {
   return event.shiftKey ? 'shift' : event.ctrlKey ? 'ctrl' : 'single';
 }
 
+function getSelectedCellIndex(selectedCells: TableDataOfSelected[], x: number, y: number): number {
+  return selectedCells.findIndex(item => item.x === x && item.y === y);
+}
 
-export { commonProps, getCellStyle, getClickType };
+export { commonProps, getCellStyle, getClickType, getSelectedCellIndex };
