@@ -1,3 +1,4 @@
+type FixTypes = 'left' | 'right';
 type TableData = Record<string, any>;
 type TableRenderFuncParams = {
   col: ColumnOptions;
@@ -9,7 +10,7 @@ interface ColumnOptions {
   title: string;
   key: string;
   slot: string;
-  fixed: 'left' | 'right';
+  fixed: FixTypes;
   width: number;
   minWidth: number;
   maxWidth: number;
@@ -23,8 +24,9 @@ interface TableStyle {
 
 interface CellStyle {
   position: string;
+  left: string;
   right: string;
   boxShadow: string;
 }
 
-export { ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams };
+export { ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes };

@@ -1,5 +1,5 @@
 import {computed, PropType} from "vue";
-import {CellStyle, ColumnOptions, TableStyle} from "./types";
+import {CellStyle, ColumnOptions, FixTypes, TableStyle} from "./types";
 import {sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
 
@@ -25,17 +25,26 @@ const commonProps = {
 function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBoundary: IsReachBoundary, index: number): Partial<CellStyle> {
   const result: Partial<CellStyle> = {};
   const col = columns[index];
-  const firstFixedIndex = computed(() => columns.findIndex(item => item.fixed));
-  const setBoxShadow = (colIndex: number): string => { // 暂时只考虑右边
-    return !scrollBoundary[1] && colIndex === firstFixedIndex.value ? '-2px 0 6px -2px rgba(0,0,0,.2)' : 'none';
+  const setBoxShadow = (colIndex: number, fixed: FixTypes): string => { // 暂时只考虑右边
+    const firstFixedIndex = columns.findIndex(item => item.fixed === fixed);
+    const boundary = fixed === 'left' ? scrollBoundary[0] : scrollBoundary[1];
+    return !boundary && colIndex === firstFixedIndex ? '-2px 0 6px -2px rgba(0,0,0,.2)' : 'none';
   }
-  if (col.fixed && tableStyle.width) { // 暂时只考虑右边
-    const sArr = columns.slice(index + 1);
-    // console.log('sArr', sArr);
-    result.position = 'sticky';
-    result.right = sumBy(sArr, 'width') + 'px';
-    // result.borderRight = '1px solid #dedfe1';
-    result.boxShadow = setBoxShadow(index);
+
+  if (tableStyle.width) {
+    if (col.fixed === 'right') {
+      const sArr = columns.slice(index + 1);
+      // console.log('sArr', sArr);
+      result.position = 'sticky';
+      result.right = sumBy(sArr, 'width') + 'px';
+      result.boxShadow = setBoxShadow(index, col.fixed);
+    } else if (col.fixed === 'left') {
+      const sArr = columns.slice(0, index);
+      // console.log('sArr', sArr);
+      result.position = 'sticky';
+      result.left = sumBy(sArr, 'width') + 'px';
+      result.boxShadow = setBoxShadow(index, col.fixed);
+    }
   }
   return result;
 }

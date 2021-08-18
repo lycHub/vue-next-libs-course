@@ -28,7 +28,8 @@ import {genTableData} from "./mock";
           {
             title: 'Name',
             key: 'name',
-            width: 200
+            width: 200,
+            fixed: 'left'
           },
           {
             title: 'Age',
