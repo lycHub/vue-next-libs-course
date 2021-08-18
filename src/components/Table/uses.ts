@@ -26,13 +26,14 @@ function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBo
   const result: Partial<CellStyle> = {};
   const col = columns[index];
   const firstFixedIndex = computed(() => columns.findIndex(item => item.fixed));
-  const setBoxShadow = (colIndex: number): string => {
+  const setBoxShadow = (colIndex: number): string => { // 暂时只考虑右边
     return !scrollBoundary[1] && colIndex === firstFixedIndex.value ? '-2px 0 6px -2px rgba(0,0,0,.2)' : 'none';
   }
-  if (col.fixed && tableStyle.width) {
+  if (col.fixed && tableStyle.width) { // 暂时只考虑右边
     const sArr = columns.slice(index + 1);
+    // console.log('sArr', sArr);
     result.position = 'sticky';
-    result.right = sumBy(sArr, 'width') + 'px'; // 暂时只考虑右边
+    result.right = sumBy(sArr, 'width') + 'px';
     // result.borderRight = '1px solid #dedfe1';
     result.boxShadow = setBoxShadow(index);
   }

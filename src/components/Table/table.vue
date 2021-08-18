@@ -200,8 +200,6 @@ export default defineComponent({
         position: relative;
         &.sec-header::-webkit-scrollbar, &.sec-footer::-webkit-scrollbar {
           background-color: transparent;
-        }
-        &.sec-header::-webkit-scrollbar, &.sec-footer::-webkit-scrollbar {
           border-right: 1px solid $border-color;
         }
         .#{$ant-pre}table {

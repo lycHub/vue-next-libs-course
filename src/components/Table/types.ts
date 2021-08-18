@@ -9,7 +9,7 @@ interface ColumnOptions {
   title: string;
   key: string;
   slot: string;
-  fixed: boolean;
+  fixed: 'left' | 'right';
   width: number;
   minWidth: number;
   maxWidth: number;
