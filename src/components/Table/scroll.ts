@@ -1,4 +1,4 @@
-type IsReachBoundary = [boolean, boolean];
+export type IsReachBoundary = [boolean, boolean];
 class ScrollService {
   readonly directions = ['horizontal', 'vertical'];
   private scrollRecords: [number, number] = [0, 0];

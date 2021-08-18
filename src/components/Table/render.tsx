@@ -1,4 +1,4 @@
-import { defineComponent, PropType } from 'vue';
+import {defineComponent, PropType, toRefs} from 'vue';
 import {ColumnOptions, TableData, TableRenderFunc} from "./types";
 
 export default defineComponent({
@@ -13,7 +13,7 @@ export default defineComponent({
       required: true
     },
     data: {
-      type: Array as PropType<TableData>,
+      type: Object as PropType<TableData>,
       default: () => ({})
     },
     renderFunc: {
@@ -21,8 +21,12 @@ export default defineComponent({
       required: true
     }
   },
-  setup({ column, index, data, renderFunc }) {
-    console.log('render data setup', data);
-    return () => renderFunc(column, index, data);
+  setup(props) {
+    // console.log('render data setup', data); 不能解构
+    return () => props.renderFunc({
+      col: props.column,
+      index: props.index,
+      data: props.data
+    });
   }
 });

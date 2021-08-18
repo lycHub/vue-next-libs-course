@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import TableDemo from './components/Table/demo.vue';
+import TableDemo from './components/Table/demos/index.vue';
 </script>
 <style lang="scss">
   .app-container {

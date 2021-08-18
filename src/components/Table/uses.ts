@@ -1,6 +1,7 @@
 import {computed, PropType} from "vue";
 import {CellStyle, ColumnOptions, TableStyle} from "./types";
 import {sumBy} from "lodash-es";
+import {IsReachBoundary} from "./scroll";
 
 const commonProps = {
   columns: {
@@ -12,19 +13,21 @@ const commonProps = {
     type: Object as PropType<TableStyle>,
     default: () => ({})
   },
-  // scrollBoundary: Array
+  scrollBoundary: {
+    type: Array as unknown as PropType<IsReachBoundary>,
+    default: () => [true, false]
+  }
 }
 
 
 
 
-function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, index: number): Partial<CellStyle> {
+function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBoundary: IsReachBoundary, index: number): Partial<CellStyle> {
   const result: Partial<CellStyle> = {};
   const col = columns[index];
   const firstFixedIndex = computed(() => columns.findIndex(item => item.fixed));
   const setBoxShadow = (colIndex: number): string => {
-    // return !this.scrollBoundary[1] && colIndex === this.firstFixedIndex ? '-2px 0 6px -2px rgba(0,0,0,.2)' : 'none';
-    return 'none';
+    return !scrollBoundary[1] && colIndex === firstFixedIndex.value ? '-2px 0 6px -2px rgba(0,0,0,.2)' : 'none';
   }
   if (col.fixed && tableStyle.width) {
     const sArr = columns.slice(index + 1);

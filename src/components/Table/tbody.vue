@@ -10,11 +10,18 @@
   </tbody>
 </template>
 
+<!--
+  todo:
+	- scroll
+	- slot
+	- 合计
+-->
+
+
 <script lang="tsx">
-import {defineComponent, ref, computed, PropType} from 'vue';
+  import {defineComponent, PropType} from 'vue';
 import RenderCell from './render';
-import {CellStyle, ColumnOptions, TableData, TableStyle} from "./types";
-import {sumBy} from "lodash-es";
+import {CellStyle, TableData} from "./types";
 import {commonProps, getCellStyle} from "./uses";
 
   export default defineComponent({
@@ -33,7 +40,7 @@ import {commonProps, getCellStyle} from "./uses";
     },
     setup(props, { emit }) {
       const cellStyle = (index: number): Partial<CellStyle> => {
-        return getCellStyle(props.columns, props.tableStyle, index);
+        return getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index);
       }
       return { cellStyle };
     }

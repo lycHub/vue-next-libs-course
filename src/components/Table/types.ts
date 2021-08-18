@@ -1,5 +1,10 @@
 type TableData = Record<string, any>;
-type TableRenderFunc = (col: ColumnOptions, index: number, data: TableData) => JSX.Element;
+type TableRenderFuncParams = {
+  col: ColumnOptions;
+  index: number;
+  data: TableData;
+};
+type TableRenderFunc = (data: TableRenderFuncParams) => JSX.Element;
 interface ColumnOptions {
   title: string;
   key: string;
@@ -22,4 +27,4 @@ interface CellStyle {
   boxShadow: string;
 }
 
-export { ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc };
+export { ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams };

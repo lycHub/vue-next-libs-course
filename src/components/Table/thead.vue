@@ -10,10 +10,9 @@
 </template>
 
 <script lang="tsx">
-import {defineComponent, ref, computed, PropType} from 'vue';
+import {defineComponent} from 'vue';
 import RenderCell from './render';
-import {CellStyle, ColumnOptions, TableStyle} from "./types";
-import {sumBy} from "lodash-es";
+import {CellStyle} from "./types";
 import {commonProps, getCellStyle} from "./uses";
 
   export default defineComponent({
@@ -22,7 +21,7 @@ import {commonProps, getCellStyle} from "./uses";
     props: commonProps,
     setup(props, { emit }) {
       const cellStyle = (index: number): Partial<CellStyle> => {
-        return getCellStyle(props.columns, props.tableStyle, index);
+        return getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index);
       }
       return { cellStyle };
     }
