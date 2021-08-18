@@ -1,3 +1,6 @@
+import {InjectionKey} from "vue";
+import {Slots} from "@vue/runtime-core";
+
 type FixTypes = 'left' | 'right';
 type TableData = Record<string, any>;
 type TableRenderFuncParams = {
@@ -29,4 +32,6 @@ interface CellStyle {
   boxShadow: string;
 }
 
-export { ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes };
+const TableRootKey: InjectionKey<Slots> = Symbol('Table slots');
+
+export { TableRootKey, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes };

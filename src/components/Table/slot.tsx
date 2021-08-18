@@ -1,5 +1,5 @@
-import {defineComponent, inject, PropType, toRefs} from 'vue';
-import {ColumnOptions, TableData, TableRenderFunc} from "./types";
+import {defineComponent, inject, PropType} from 'vue';
+import {ColumnOptions, TableData, TableRenderFunc, TableRootKey} from "./types";
 
 export default defineComponent({
   name: 'RenderCell',
@@ -15,18 +15,14 @@ export default defineComponent({
     data: {
       type: Object as PropType<TableData>,
       default: () => ({})
-    },
-    renderFunc: {
-      type: Function as PropType<TableRenderFunc>,
-      required: true
     }
   },
   setup(props) {
-    // console.log('render data setup', data); 不能解构
-    return () => props.renderFunc({
+    const tableSlots = inject(TableRootKey);
+    return () => tableSlots ? tableSlots[props.column.slot]!({
       col: props.column,
       index: props.index,
       data: props.data
-    });
+    }) : null;
   }
 });

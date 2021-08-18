@@ -24,13 +24,14 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch} from 'vue';
+import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
 import {partition, sum, sumBy} from "lodash-es";
 import TableHeader from './thead.vue';
 import TableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
-import {ColumnOptions, TableData} from "./types";
+import {ColumnOptions, TableData, TableRootKey} from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
+import {Slots} from "@vue/runtime-core";
 
 interface TableSectionEls {
   head: HTMLElement;
@@ -59,7 +60,8 @@ export default defineComponent({
       default: 'id'
     }
   },
-  setup(props, { emit }) {
+  setup(props, { emit, slots }) {
+    provide(TableRootKey, slots);
     const tableRootHtml = ref<WrapWithUndefined<HTMLElement>>(undefined);
     const separateHeight = ref(false);
     const colTotalWidth = ref(0);

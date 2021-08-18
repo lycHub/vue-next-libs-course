@@ -1,6 +1,6 @@
 import {computed, PropType} from "vue";
 import {CellStyle, ColumnOptions, FixTypes, TableStyle} from "./types";
-import {sumBy} from "lodash-es";
+import {findIndex, findLastIndex, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
 
 const commonProps = {
@@ -26,9 +26,13 @@ function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBo
   const result: Partial<CellStyle> = {};
   const col = columns[index];
   const setBoxShadow = (colIndex: number, fixed: FixTypes): string => { // 暂时只考虑右边
-    const firstFixedIndex = columns.findIndex(item => item.fixed === fixed);
     const boundary = fixed === 'left' ? scrollBoundary[0] : scrollBoundary[1];
-    return !boundary && colIndex === firstFixedIndex ? '-2px 0 6px -2px rgba(0,0,0,.2)' : 'none';
+    const indexFunc = fixed === 'left' ? findLastIndex : findIndex;
+    const boxShadowXY = fixed === 'left' ? '2px 0 ' : '-2px 0 ';
+    const edgeFixedIndex = indexFunc(columns, { fixed });
+
+    // console.log('colIndex firstFixedIndex', colIndex, edgeFixedIndex);
+    return !boundary && colIndex === edgeFixedIndex ? boxShadowXY +'6px -2px rgb(0 0 0 / 20%)' : 'none';
   }
 
   if (tableStyle.width) {
