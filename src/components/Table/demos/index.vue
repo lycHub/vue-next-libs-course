@@ -31,14 +31,12 @@ import {genTableData} from "./mock";
           {
             title: 'Name',
             key: 'name',
-            width: 200,
-            fixed: 'left'
+            width: 200
           },
           {
             title: 'Age',
             slot: 'age',
-            width: 200,
-            fixed: 'left'
+            width: 200
           },
           {
             title: 'Province',
@@ -58,13 +56,11 @@ import {genTableData} from "./mock";
           {
             title: 'Postcode',
             key: 'zip',
-            width: 200,
-            fixed: 'right',
+            width: 200
           },
           {
             title: 'Action',
             width: 120,
-            fixed: 'right',
             render: ({ data }: TableRenderFuncParams) => {
               // console.log('data', data);
               return <div class="table-acts">

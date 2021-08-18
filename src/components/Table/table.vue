@@ -192,6 +192,7 @@ export default defineComponent({
 </script>
 <style lang="scss">
   .#{$ant-pre}table-wrap {
+    background-color: $white-color;
     .#{$ant-pre}tables {
       overflow-x: auto;
       border: {
@@ -207,28 +208,22 @@ export default defineComponent({
         .#{$ant-pre}table {
           width: 100%;
           min-width: 100%;
-          //border: 1px solid $border-color;
-          //border-bottom: none;
           table-layout: fixed;
           .table-row {
-            &:hover .table-cell {
+            transition: background-color .2s ease-in-out;
+            &:hover {
               background-color: $bg-prev-color;
             }
             .table-cell {
               padding: 2px 18px;
               height: 48px;
-              background-color: $white-color;
               border: {
                 bottom: 1px solid $border-color;
                 right: 1px solid $border-color;
               }
-              transition: background-color .2s ease-in-out;
             }
           }
         }
-      }
-      .sec-header {
-        //border-bottom: 1px solid $border-color;
       }
     }
   }
