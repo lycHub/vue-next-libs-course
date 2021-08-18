@@ -2,7 +2,9 @@ import {InjectionKey} from "vue";
 import {Slots} from "@vue/runtime-core";
 
 type FixTypes = 'left' | 'right';
+type SelectMode = 'row' | 'cell';
 type TableData = Record<string, any>;
+
 type TableRenderFuncParams = {
   col: ColumnOptions;
   index: number;
@@ -32,6 +34,13 @@ interface CellStyle {
   boxShadow: string;
 }
 
+type ClickType = 'single' | 'ctrl' | 'shift';
+
+interface SelectedRow {
+  index: number;
+  clickType: ClickType;
+}
+
 const TableRootKey: InjectionKey<Slots> = Symbol('Table slots');
 
-export { TableRootKey, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes };
+export { TableRootKey, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

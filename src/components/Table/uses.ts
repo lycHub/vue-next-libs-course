@@ -1,5 +1,5 @@
 import {computed, PropType} from "vue";
-import {CellStyle, ColumnOptions, FixTypes, TableStyle} from "./types";
+import {CellStyle, ClickType, ColumnOptions, FixTypes, TableStyle} from "./types";
 import {findIndex, findLastIndex, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
 
@@ -53,4 +53,10 @@ function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBo
   return result;
 }
 
-export { commonProps, getCellStyle };
+
+function getClickType(event: MouseEvent): ClickType {
+  return event.shiftKey ? 'shift' : event.ctrlKey ? 'ctrl' : 'single';
+}
+
+
+export { commonProps, getCellStyle, getClickType };

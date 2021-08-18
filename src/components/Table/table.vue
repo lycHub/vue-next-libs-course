@@ -15,8 +15,15 @@
           <colgroup>
             <col v-for="item of cols" :width="item" />
           </colgroup>
-          <!-- :scrollBoundary="scrollBoundary"  -->
-          <table-body :columns="columns" :data="tableData" :tableStyle="tableStyle" :row-key="rowKey" :scrollBoundary="scrollBoundary" />
+          <table-body
+            :columns="columns"
+            :data="tableData"
+            :tableStyle="tableStyle"
+            :row-key="rowKey"
+            :scrollBoundary="scrollBoundary"
+            :select-mode="selectMode"
+            :select-indexes="selectedRowIndexes"
+            @rowClick="handleRowClick"/>
         </table>
       </div>
     </div>
@@ -25,13 +32,13 @@
 
 <script lang="ts">
 import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
-import {partition, sum, sumBy} from "lodash-es";
+import {orderBy, partition, range, sum, sumBy} from "lodash-es";
 import TableHeader from './thead.vue';
 import TableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
-import {ColumnOptions, TableData, TableRootKey} from "./types";
+import {ColumnOptions, SelectedRow, SelectMode, TableData, TableRootKey} from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
-import {Slots} from "@vue/runtime-core";
+import {genIndexesFromRange} from "../utils/tools";
 
 interface TableSectionEls {
   head: HTMLElement;
@@ -58,7 +65,8 @@ export default defineComponent({
     rowKey: {
       type: String,
       default: 'id'
-    }
+    },
+    selectMode: String as PropType<WrapWithUndefined<SelectMode>>
   },
   setup(props, { emit, slots }) {
     provide(TableRootKey, slots);
@@ -69,6 +77,9 @@ export default defineComponent({
 
     // 横向滚动条是否到[左, 右]边界
     const scrollBoundary = ref<IsReachBoundary>([true, false]);
+
+    // 保存选中的行
+    const selectedRowIndexes = ref<number[]>([]);
 
     const bodyHeadDom = (): Partial<TableSectionEls> => {
       if (tableRootHtml.value instanceof HTMLElement) {
@@ -91,6 +102,7 @@ export default defineComponent({
 
     const init = () => {
       tableData.value = props.data || [];
+      selectedRowIndexes.value = [];
       setSeparateHeight();
     }
 
@@ -125,9 +137,7 @@ export default defineComponent({
       const { head, body } = bodyHeadDom();
       // console.log('render head body', head, body);
       if (head && body) {
-        // debugger;
         const trueWidth = body.clientWidth;
-        console.log('trueWidth', trueWidth);
         const [hasWidthColumns, noWidthColumns] = partition(props.columns, 'width');
         const colCountWidth = sumBy(hasWidthColumns, 'width');
         const restWidth = trueWidth - colCountWidth;
@@ -167,15 +177,39 @@ export default defineComponent({
       }
     }
 
-    init();
+    const handleRowClick = (row: SelectedRow) => {
+      // console.log('handleRowClick', row);
+      const targetIndexOfSelectedRowIndexes = selectedRowIndexes.value.findIndex(item => item === row.index);
+      switch (row.clickType) {
+        case 'ctrl':
+          if (selectedRowIndexes.value.length) {
+            if (targetIndexOfSelectedRowIndexes > -1) {
+              selectedRowIndexes.value.splice(targetIndexOfSelectedRowIndexes, 1);
+            } else {
+              selectedRowIndexes.value.push(row.index);
+            }
+          } else {
+            selectedRowIndexes.value = [row.index];
+          }
+          break;
+        case 'shift':
+          if (selectedRowIndexes.value.length) {
+            const indexes = genIndexesFromRange([selectedRowIndexes.value[0], row.index]);
+            selectedRowIndexes.value = indexes;
+          } else {
+            selectedRowIndexes.value = [row.index];
+          }
+          break;
+        default:
+          selectedRowIndexes.value = [row.index];
+          break;
+      }
+      console.log('selectedRowIndexes', selectedRowIndexes.value);
+    }
 
+    init();
     watch(() => props.data, newVal => {
       init();
-    });
-
-
-    onMounted(() => {
-      console.log('tableRootHtml', tableRootHtml.value);
     });
     return {
       hfStyle,
@@ -185,7 +219,9 @@ export default defineComponent({
       cols,
       tableData,
       handleBodyScroll,
+      handleRowClick,
       scrollBoundary,
+      selectedRowIndexes,
     }
   }
 });
@@ -222,6 +258,9 @@ export default defineComponent({
                 right: 1px solid $border-color;
               }
             }
+          }
+          .table-row.selected {
+            background-color: $assist-color;
           }
         }
       }
