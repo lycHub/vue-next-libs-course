@@ -88,6 +88,9 @@ export default defineComponent({
     // 保存选中的单元格
     const selectedCells = ref<TableDataOfSelected[]>([]);
 
+    // shift选择时，起点的索引
+    let startCellOfShiftSelectCell: WrapWithUndefined<TableDataOfSelected>;
+
     const handleTableCellClick = (cell: TableDataOfSelected, event: MouseEvent) => {
       if (props.selectMode !== 'cell') return;
       event.stopPropagation();
@@ -96,6 +99,7 @@ export default defineComponent({
       // console.log('targetIndexOfSelectedCells', targetIndexOfSelectedCells);
       switch (clickType) {
         case 'ctrl':
+          startCellOfShiftSelectCell = undefined;
           if (selectedCells.value.length) {
             if (targetIndexOfSelectedCells > -1) {
               selectedCells.value.splice(targetIndexOfSelectedCells, 1);
@@ -108,13 +112,21 @@ export default defineComponent({
           break;
         case 'shift':
          /* if (selectedRowIndexes.value.length) {
-            selectedRowIndexes.value = genIndexesFromRange([selectedRowIndexes.value[0], row.index]);
+            if (!startRowOfShiftSelectRow) {
+              startRowOfShiftSelectRow = last(selectedRowIndexes.value)!;
+            }
+            // 以startRowOfShiftSelectRow对应的index为起点，之前的保留下来，后面的去掉
+            const startIndex = selectedRowIndexes.value.findIndex(item => item === startRowOfShiftSelectRow);
+            const remainRows = take(selectedRowIndexes.value, startIndex + 1); // 取前面的 startIndex + 1 个元素
+            const lastOfRemainRow = last(remainRows)!;
+            selectedRowIndexes.value = remainRows.concat(genIndexesFromRange([lastOfRemainRow, row.index]));
             getSelection()!.removeAllRanges();
           } else {
             selectedRowIndexes.value = [row.index];
           }*/
           break;
         default:
+          startCellOfShiftSelectCell = undefined;
           if (selectedCells.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCells.value = [];
           } else {
@@ -240,7 +252,6 @@ export default defineComponent({
           break;
         case 'shift':
           if (selectedRowIndexes.value.length) {
-            // debugger;
             if (!startRowOfShiftSelectRow) {
               startRowOfShiftSelectRow = last(selectedRowIndexes.value)!;
             }
