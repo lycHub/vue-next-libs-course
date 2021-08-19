@@ -139,8 +139,8 @@ export default defineComponent({
           break;
         case 'shift':
           if (selectedCellCoordinates.value.length) {
-            selectedCellCoordinatesInRange.value = [];
             // 把所有inRange清空但起点要保留，不然无法生成新的范围
+            selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.filter(item => item.isStart);
             selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => !item.inRange || item.isStart);
             if (!startCell) {
               selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
