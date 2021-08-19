@@ -110,22 +110,26 @@ export default defineComponent({
       event.stopPropagation();
       const clickType = getClickType(event);
       const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
-      const startCell = selectedCellCoordinates.value.find(item => item.isStart);
+      const targetIndexOfSelectedInRangeCells = getSelectedCellIndex(selectedCellCoordinatesInRange.value, coordinate.x, coordinate.y);
+      const startCell = selectedCellCoordinates.value.find(item => item.isStart) || selectedCellCoordinatesInRange.value.find(item => item.isStart);
       const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
 
       switch (clickType) {
         case 'ctrl':
-          // startCellOfShiftCellCoordinates = undefined;
-          if (selectedCellCoordinates.value.length) {
-            if (targetIndexOfSelectedCells > -1) {
-              selectedCellCoordinates.value.splice(targetIndexOfSelectedCells, 1);
+          if (selectedCellCoordinates.value.length || selectedCellCoordinatesInRange.value.length) {
+            if (startCell) {
+              Reflect.deleteProperty(startCell, 'isStart');
+            }
+            if (endCellIndex > -1) {
+              Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
+            }
+            if (selectedCellCoordinates.value[targetIndexOfSelectedCells]?.inRange) {
+              selectedCellCoordinates.value[targetIndexOfSelectedCells].isStart = true;
+              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
+            } else if (selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells]?.inRange) {
+              selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells].isStart = true;
+              selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.slice();
             } else {
-              if (startCell) {
-                Reflect.deleteProperty(startCell, 'isStart');
-              }
-              if (endCellIndex > -1) {
-                Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
-              }
               // todo: 样式有问题
               selectedCellCoordinates.value.push({ ...coordinate });
             }
@@ -135,26 +139,32 @@ export default defineComponent({
           break;
         case 'shift':
           if (selectedCellCoordinates.value.length) {
+            selectedCellCoordinatesInRange.value = [];
+            // 把所有inRange清空但起点要保留，不然无法生成新的范围
+            selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => !item.inRange || item.isStart);
             if (!startCell) {
               selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
+              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].inRange = true;
+              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
             }
             if (endCellIndex > -1) {
+              // todo: inRange ？？
+              // Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
               selectedCellCoordinates.value.splice(endCellIndex, 1);
             }
             if (targetIndexOfSelectedCells > -1) {
               // 直接改.isEnd  不会触发响应式
-              selectedCellCoordinates.value[targetIndexOfSelectedCells] = { ...coordinate, isEnd: true };
+              selectedCellCoordinates.value[targetIndexOfSelectedCells] = { ...coordinate, isEnd: true, inRange: true };
             } else {
-              selectedCellCoordinates.value.push({ ...coordinate, isEnd: true });
+              selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
             }
-            // selectedCellCoordinatesInRange.value = [];
             getSelection()!.removeAllRanges();
           } else {
             selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
         default:
-          // startCellOfShiftCellCoordinates = undefined;
+          selectedCellCoordinatesInRange.value = [];
           if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCellCoordinates.value = [];
           } else {
@@ -315,6 +325,9 @@ export default defineComponent({
     watch(() => props.data, () => {
       init();
     });
+   /* watch(selectedCellCoordinatesInRange, (newVal) => {
+      console.log('wat selectedCellCoordinatesInRange', newVal, newVal.leng);
+    }, { deep: true });*/
     return {
       hfStyle,
       bodyStyle,
