@@ -94,8 +94,16 @@ export default defineComponent({
     // 保存选中单元格的坐标
     const selectedCellCoordinates = ref<CellCoordinate[]>([]);
 
+    // 保存范围内被选中的单元格坐标
+    const selectedCellCoordinatesInRange = ref<CellCoordinate[]>([]);
+
     // shift选择时，起点的索引
     // let startCellOfShiftCellCoordinates: WrapWithUndefined<CellCoordinate>;
+
+    const addCellCoordinatesInRange = (coordinate: CellCoordinate) => {
+      selectedCellCoordinatesInRange.value.push(coordinate);
+      // console.log('selectedCellCoordinatesInRange', selectedCellCoordinatesInRange.value);
+    }
 
     const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
       if (props.selectMode !== 'cell') return;
@@ -103,6 +111,8 @@ export default defineComponent({
       const clickType = getClickType(event);
       const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
       const startCell = selectedCellCoordinates.value.find(item => item.isStart);
+      const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+
       switch (clickType) {
         case 'ctrl':
           // startCellOfShiftCellCoordinates = undefined;
@@ -110,14 +120,17 @@ export default defineComponent({
             if (targetIndexOfSelectedCells > -1) {
               selectedCellCoordinates.value.splice(targetIndexOfSelectedCells, 1);
             } else {
-              // todo: 之前的isEnd属性也要删？
               if (startCell) {
                 Reflect.deleteProperty(startCell, 'isStart');
               }
-              selectedCellCoordinates.value.push({ ...coordinate, isStart: true });
+              if (endCellIndex > -1) {
+                Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
+              }
+              // todo: 样式有问题
+              selectedCellCoordinates.value.push({ ...coordinate });
             }
           } else {
-            selectedCellCoordinates.value = [coordinate];
+            selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
         case 'shift':
@@ -125,20 +138,19 @@ export default defineComponent({
             if (!startCell) {
               selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
             }
-            const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
             if (endCellIndex > -1) {
               selectedCellCoordinates.value.splice(endCellIndex, 1);
             }
-            selectedCellCoordinates.value.push({ ...coordinate, isEnd: true });
-            // genCoordinatesFromRange([startCellOfShiftCellCoordinates, coordinate]);
-            // 以startCellOfShiftCellCoordinates对应的index为起点，之前的保留下来，后面的去掉
-            /*const startIndex = getSelectedCellIndex(selectedCellCoordinates.value, startCellOfShiftCellCoordinates.x, startCellOfShiftCellCoordinates.y);
-            const remainRows = take(selectedRowIndexes.value, startIndex + 1); // 取前面的 startIndex + 1 个元素
-            const lastOfRemainRow = last(remainRows)!;
-            selectedRowIndexes.value = remainRows.concat(genIndexesFromRange([lastOfRemainRow, row.index]));*/
+            if (targetIndexOfSelectedCells > -1) {
+              // 直接改.isEnd  不会触发响应式
+              selectedCellCoordinates.value[targetIndexOfSelectedCells] = { ...coordinate, isEnd: true };
+            } else {
+              selectedCellCoordinates.value.push({ ...coordinate, isEnd: true });
+            }
+            // selectedCellCoordinatesInRange.value = [];
             getSelection()!.removeAllRanges();
           } else {
-            selectedCellCoordinates.value = [coordinate];
+            selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
         default:
@@ -146,18 +158,19 @@ export default defineComponent({
           if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCellCoordinates.value = [];
           } else {
-            selectedCellCoordinates.value = [coordinate];
+            selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
       }
-      console.log('selectedCellCoordinates', selectedCellCoordinates);
+      // console.log('selectedCellCoordinates', selectedCellCoordinates);
     }
 
     provide(TableRootKey, {
       rowKey: props.rowKey,
       slots,
-      selectedCellCoordinates,
-      handleTableCellClick
+      highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
+      handleTableCellClick,
+      addCellCoordinatesInRange,
     });
 
     const bodyHeadDom = (): Partial<TableSectionEls> => {
@@ -355,7 +368,7 @@ export default defineComponent({
             }
             .table-cell.selected.is-start {
               background-color: unset;
-              border: 1px solid $assist-color;;
+              border: 2px solid $assist-color;
             }
           }
           .table-row.selected {

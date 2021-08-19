@@ -5,8 +5,9 @@ import {CellCoordinate} from "./types";
 interface TableRootCtx {
   rowKey: string;
   slots: Slots;
-  selectedCellCoordinates: Ref<CellCoordinate[]>;
-  handleTableCellClick: (cell: CellCoordinate, event: MouseEvent) => void;
+  highCells: Ref<CellCoordinate[]>;
+  handleTableCellClick(cell: CellCoordinate, event: MouseEvent): void;
+  addCellCoordinatesInRange(coordinate: CellCoordinate): void
 }
 
 const TableRootKey: InjectionKey<TableRootCtx> = Symbol('Table slots');

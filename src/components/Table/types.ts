@@ -1,7 +1,7 @@
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
 type TableData = Record<string, any>;
-type CellCoordinate = { x: number; y: number; isStart?: boolean; isEnd?: boolean; };
+type CellCoordinate = { x: number; y: number; isStart?: boolean; isEnd?: boolean; inRange?: boolean; };
 
 type TableDataOfSelected = TableData & CellCoordinate;
 
