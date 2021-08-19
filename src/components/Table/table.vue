@@ -102,7 +102,7 @@ export default defineComponent({
       event.stopPropagation();
       const clickType = getClickType(event);
       const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
-      // console.log('targetIndexOfSelectedCells', targetIndexOfSelectedCells);
+      const startCell = selectedCellCoordinates.value.find(item => item.isStart);
       switch (clickType) {
         case 'ctrl':
           // startCellOfShiftCellCoordinates = undefined;
@@ -110,7 +110,11 @@ export default defineComponent({
             if (targetIndexOfSelectedCells > -1) {
               selectedCellCoordinates.value.splice(targetIndexOfSelectedCells, 1);
             } else {
-              selectedCellCoordinates.value.push(coordinate);
+              // todo: 之前的isEnd属性也要删？
+              if (startCell) {
+                Reflect.deleteProperty(startCell, 'isStart');
+              }
+              selectedCellCoordinates.value.push({ ...coordinate, isStart: true });
             }
           } else {
             selectedCellCoordinates.value = [coordinate];
@@ -118,9 +122,12 @@ export default defineComponent({
           break;
         case 'shift':
           if (selectedCellCoordinates.value.length) {
-            const startCell = selectedCellCoordinates.value.find(item => item.isStart);
             if (!startCell) {
               selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
+            }
+            const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+            if (endCellIndex > -1) {
+              selectedCellCoordinates.value.splice(endCellIndex, 1);
             }
             selectedCellCoordinates.value.push({ ...coordinate, isEnd: true });
             // genCoordinatesFromRange([startCellOfShiftCellCoordinates, coordinate]);
@@ -345,6 +352,10 @@ export default defineComponent({
             }
             .table-cell.selected {
               background-color: $assist-color;
+            }
+            .table-cell.selected.is-start {
+              background-color: unset;
+              border: 1px solid $assist-color;;
             }
           }
           .table-row.selected {

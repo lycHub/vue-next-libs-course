@@ -64,6 +64,7 @@ function getSelectedCellIndex(selectedCells: TableDataOfSelected[], x: number, y
 }
 
 function isInRangeOfCoordinates(range: [CellCoordinate, CellCoordinate], target: CellCoordinate): boolean {
+  // const isBoundary = getSelectedCellIndex(range, target.x, target.y) > -1;
   const rowRange = orderBy([range[0].x, range[1].x]);
   const colRange = orderBy([range[0].y, range[1].y]);
   return (target.x >= rowRange[0] && target.x <= rowRange[1]) && (target.y >= colRange[0] && target.y <= colRange[1]);
