@@ -3,7 +3,9 @@ import {SelectedRow} from "./types";
 import {last, take} from "lodash-es";
 import {genIndexesFromRange} from "../utils/tools";
 
+// shift选择时，起点的索引
 let startRowOfShiftSelectRow: WrapWithUndefined<number>;
+
 function ctrlSelect(row: SelectedRow, selectedRowIndexes: number[], targetIndexOfSelectedRowIndexes: number): number[] {
   startRowOfShiftSelectRow = undefined;
   if (selectedRowIndexes.length) {
@@ -19,7 +21,7 @@ function ctrlSelect(row: SelectedRow, selectedRowIndexes: number[], targetIndexO
 }
 
 
-function shiftSelect(row: SelectedRow, selectedRowIndexes: number[], targetIndexOfSelectedRowIndexes: number): number[] {
+function shiftSelect(row: SelectedRow, selectedRowIndexes: number[]): number[] {
   if (selectedRowIndexes.length) {
     if (!startRowOfShiftSelectRow) {
       startRowOfShiftSelectRow = last(selectedRowIndexes)!;

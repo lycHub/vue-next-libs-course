@@ -88,9 +88,6 @@ export default defineComponent({
     // 保存选中的行
     const selectedRowIndexes = ref<number[]>([]);
 
-    // shift选择时，起点的索引
-    let startRowOfShiftSelectRow: WrapWithUndefined<number>;
-
     // 保存选中单元格的坐标
     const selectedCellCoordinates = ref<CellCoordinate[]>([]);
 
@@ -224,11 +221,10 @@ export default defineComponent({
               selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells].isStart = true;
               selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.slice();
             } else {
-              // todo: 样式有问题
-              selectedCellCoordinates.value.push({ ...coordinate });
+              selectedCellCoordinates.value.push(coordinate);
             }
           } else {
-            selectedCellCoordinates.value = [{ ...coordinate }];
+            selectedCellCoordinates.value = [coordinate];
           }
           break;
         case 'shift':
@@ -254,7 +250,7 @@ export default defineComponent({
             }
             getSelection()!.removeAllRanges();
           } else {
-            selectedCellCoordinates.value = [{ ...coordinate }];
+            selectedCellCoordinates.value = [coordinate];
           }
           break;
         default:
@@ -262,7 +258,7 @@ export default defineComponent({
           if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCellCoordinates.value = [];
           } else {
-            selectedCellCoordinates.value = [{ ...coordinate }];
+            selectedCellCoordinates.value = [coordinate];
           }
           break;
       }
