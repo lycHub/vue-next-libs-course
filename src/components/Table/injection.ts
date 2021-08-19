@@ -1,12 +1,12 @@
 import {InjectionKey, Ref} from "vue";
 import {Slots} from "@vue/runtime-core";
-import {TableDataOfSelected} from "./types";
+import {CellCoordinate} from "./types";
 
 interface TableRootCtx {
   rowKey: string;
   slots: Slots;
-  selectedCells: Ref<TableDataOfSelected[]>;
-  handleTableCellClick: (cell: TableDataOfSelected, event: MouseEvent) => void;
+  selectedCellCoordinates: Ref<CellCoordinate[]>;
+  handleTableCellClick: (cell: CellCoordinate, event: MouseEvent) => void;
 }
 
 const TableRootKey: InjectionKey<TableRootCtx> = Symbol('Table slots');

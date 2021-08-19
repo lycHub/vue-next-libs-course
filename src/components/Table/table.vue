@@ -32,11 +32,17 @@
 
 <script lang="ts">
 import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
-import {last, orderBy, partition, range, sum, sumBy, take} from "lodash-es";
+import {last, partition, sum, sumBy, take} from "lodash-es";
 import ATableHead from './thead.vue';
 import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
-import {ClickType, ColumnOptions, SelectedRow, SelectMode, TableData, TableDataOfSelected} from "./types";
+import {
+  CellCoordinate,
+  ColumnOptions,
+  SelectedRow,
+  SelectMode,
+  TableData
+} from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
 import {genIndexesFromRange} from "../utils/tools";
 import {TableRootKey} from "./injection";
@@ -85,29 +91,29 @@ export default defineComponent({
     // shift选择时，起点的索引
     let startRowOfShiftSelectRow: WrapWithUndefined<number>;
 
-    // 保存选中的单元格
-    const selectedCells = ref<TableDataOfSelected[]>([]);
+    // 保存选中单元格的坐标
+    const selectedCellCoordinates = ref<CellCoordinate[]>([]);
 
     // shift选择时，起点的索引
-    let startCellOfShiftSelectCell: WrapWithUndefined<TableDataOfSelected>;
+    let startCellOfShiftCellCoordinates: WrapWithUndefined<CellCoordinate>;
 
-    const handleTableCellClick = (cell: TableDataOfSelected, event: MouseEvent) => {
+    const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
       if (props.selectMode !== 'cell') return;
       event.stopPropagation();
       const clickType = getClickType(event);
-      const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCells.value, cell.x, cell.y);
+      const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
       // console.log('targetIndexOfSelectedCells', targetIndexOfSelectedCells);
       switch (clickType) {
         case 'ctrl':
-          startCellOfShiftSelectCell = undefined;
-          if (selectedCells.value.length) {
+          startCellOfShiftCellCoordinates = undefined;
+          if (selectedCellCoordinates.value.length) {
             if (targetIndexOfSelectedCells > -1) {
-              selectedCells.value.splice(targetIndexOfSelectedCells, 1);
+              selectedCellCoordinates.value.splice(targetIndexOfSelectedCells, 1);
             } else {
-              selectedCells.value.push(cell);
+              selectedCellCoordinates.value.push(coordinate);
             }
           } else {
-            selectedCells.value = [cell];
+            selectedCellCoordinates.value = [coordinate];
           }
           break;
         case 'shift':
@@ -126,21 +132,21 @@ export default defineComponent({
           }*/
           break;
         default:
-          startCellOfShiftSelectCell = undefined;
-          if (selectedCells.value.length === 1 && targetIndexOfSelectedCells === 0) {
-            selectedCells.value = [];
+          startCellOfShiftCellCoordinates = undefined;
+          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
+            selectedCellCoordinates.value = [];
           } else {
-            selectedCells.value = [cell];
+            selectedCellCoordinates.value = [coordinate];
           }
           break;
       }
-      // console.log('selectedCells', selectedCells);
+      console.log('selectedCellCoordinates', selectedCellCoordinates);
     }
 
     provide(TableRootKey, {
       rowKey: props.rowKey,
       slots,
-      selectedCells,
+      selectedCellCoordinates,
       handleTableCellClick
     });
 

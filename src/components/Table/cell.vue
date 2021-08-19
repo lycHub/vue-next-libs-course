@@ -40,11 +40,11 @@ import {TableRootKey} from "./injection";
       }
 
       const cellCls = computed(() => {
-        const targetIndex = getSelectedCellIndex(tableSlots.selectedCells.value, props.index, props.colIndex);
+        const targetIndex = getSelectedCellIndex(tableSlots.selectedCellCoordinates.value, props.index, props.colIndex);
         return `table-cell ${ targetIndex > -1 ? 'selected' : '' }`;
       });
       const clickCell = (event: MouseEvent) => {
-        tableSlots.handleTableCellClick({ ...props.data, x: props.index, y: props.colIndex }, event);
+        tableSlots.handleTableCellClick({ x: props.index, y: props.colIndex }, event);
       }
       return { cellStyle, column, clickCell, cellCls };
     }

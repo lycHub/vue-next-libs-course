@@ -41,4 +41,4 @@ interface SelectedRow {
   clickType: ClickType;
 }
 
-export { TableDataOfSelected, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { TableDataOfSelected, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
