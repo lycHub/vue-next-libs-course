@@ -41,7 +41,7 @@ import {TableRootKey} from "./injection";
       const selected = ref(false);
       const isStart = ref(false);
       watch(tableSlots.highCells, highCells => {
-        console.log('wat tableSlots.highCells', highCells);
+        // console.log('wat tableSlots.highCells', highCells);
         const targetIndex = getSelectedCellIndex(highCells, props.index, props.colIndex);
         const startCell = highCells.find(item => item.isStart);
         const endCell = highCells.find(item => item.isEnd);

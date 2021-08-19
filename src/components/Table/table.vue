@@ -44,9 +44,9 @@ import {
   TableData
 } from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
-import {genIndexesFromRange} from "../utils/tools";
 import {TableRootKey} from "./injection";
 import {getClickType, getSelectedCellIndex} from "./uses";
+import {rowSelectStrategies} from "./select-row-strategies";
 
 interface TableSectionEls {
   head: HTMLElement;
@@ -76,7 +76,7 @@ export default defineComponent({
     },
     selectMode: String as PropType<WrapWithUndefined<SelectMode>>
   },
-  setup(props, { emit, slots }) {
+  setup(props, { slots }) {
     const tableRootHtml = ref<WrapWithUndefined<HTMLElement>>(undefined);
     const separateHeight = ref(false);
     const colTotalWidth = ref(0);
@@ -96,92 +96,6 @@ export default defineComponent({
 
     // 保存范围内被选中的单元格坐标
     const selectedCellCoordinatesInRange = ref<CellCoordinate[]>([]);
-
-    // shift选择时，起点的索引
-    // let startCellOfShiftCellCoordinates: WrapWithUndefined<CellCoordinate>;
-
-    const addCellCoordinatesInRange = (coordinate: CellCoordinate) => {
-      selectedCellCoordinatesInRange.value.push(coordinate);
-      // console.log('selectedCellCoordinatesInRange', selectedCellCoordinatesInRange.value);
-    }
-
-    const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
-      if (props.selectMode !== 'cell') return;
-      event.stopPropagation();
-      const clickType = getClickType(event);
-      const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
-      const targetIndexOfSelectedInRangeCells = getSelectedCellIndex(selectedCellCoordinatesInRange.value, coordinate.x, coordinate.y);
-      const startCell = selectedCellCoordinates.value.find(item => item.isStart) || selectedCellCoordinatesInRange.value.find(item => item.isStart);
-      const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
-
-      switch (clickType) {
-        case 'ctrl':
-          if (selectedCellCoordinates.value.length || selectedCellCoordinatesInRange.value.length) {
-            if (startCell) {
-              Reflect.deleteProperty(startCell, 'isStart');
-            }
-            if (endCellIndex > -1) {
-              Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
-            }
-            if (selectedCellCoordinates.value[targetIndexOfSelectedCells]?.inRange) {
-              selectedCellCoordinates.value[targetIndexOfSelectedCells].isStart = true;
-              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
-            } else if (selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells]?.inRange) {
-              selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells].isStart = true;
-              selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.slice();
-            } else {
-              // todo: 样式有问题
-              selectedCellCoordinates.value.push({ ...coordinate });
-            }
-          } else {
-            selectedCellCoordinates.value = [{ ...coordinate }];
-          }
-          break;
-        case 'shift':
-          if (selectedCellCoordinates.value.length) {
-            // 把所有inRange清空但起点要保留，不然无法生成新的范围
-            selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.filter(item => item.isStart);
-            selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => !item.inRange || item.isStart);
-            if (!startCell) {
-              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
-              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].inRange = true;
-              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
-            }
-            if (endCellIndex > -1) {
-              // todo: inRange ？？
-              // Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
-              selectedCellCoordinates.value.splice(endCellIndex, 1);
-            }
-            if (targetIndexOfSelectedCells > -1) {
-              // 直接改.isEnd  不会触发响应式
-              selectedCellCoordinates.value[targetIndexOfSelectedCells] = { ...coordinate, isEnd: true, inRange: true };
-            } else {
-              selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
-            }
-            getSelection()!.removeAllRanges();
-          } else {
-            selectedCellCoordinates.value = [{ ...coordinate }];
-          }
-          break;
-        default:
-          selectedCellCoordinatesInRange.value = [];
-          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
-            selectedCellCoordinates.value = [];
-          } else {
-            selectedCellCoordinates.value = [{ ...coordinate }];
-          }
-          break;
-      }
-      // console.log('selectedCellCoordinates', selectedCellCoordinates);
-    }
-
-    provide(TableRootKey, {
-      rowKey: props.rowKey,
-      slots,
-      highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
-      handleTableCellClick,
-      addCellCoordinatesInRange,
-    });
 
     const bodyHeadDom = (): Partial<TableSectionEls> => {
       if (tableRootHtml.value instanceof HTMLElement) {
@@ -276,45 +190,92 @@ export default defineComponent({
     const handleRowClick = (row: SelectedRow) => {
       if (props.selectMode !== 'row') return;
       const targetIndexOfSelectedRowIndexes = selectedRowIndexes.value.findIndex(item => item === row.index);
-      switch (row.clickType) {
+      selectedRowIndexes.value = rowSelectStrategies[row.clickType](row, selectedRowIndexes.value, targetIndexOfSelectedRowIndexes);
+      // console.log('selectedRowIndexes', selectedRowIndexes.value);
+    }
+
+    const addCellCoordinatesInRange = (coordinate: CellCoordinate) => {
+      selectedCellCoordinatesInRange.value.push(coordinate);
+      // console.log('selectedCellCoordinatesInRange', selectedCellCoordinatesInRange.value);
+    }
+
+    const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
+      if (props.selectMode !== 'cell') return;
+      event.stopPropagation();
+      const clickType = getClickType(event);
+      const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
+      const targetIndexOfSelectedInRangeCells = getSelectedCellIndex(selectedCellCoordinatesInRange.value, coordinate.x, coordinate.y);
+      const startCell = selectedCellCoordinates.value.find(item => item.isStart) || selectedCellCoordinatesInRange.value.find(item => item.isStart);
+      const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+
+      switch (clickType) {
         case 'ctrl':
-          startRowOfShiftSelectRow = undefined;
-          if (selectedRowIndexes.value.length) {
-            if (targetIndexOfSelectedRowIndexes > -1) {
-              selectedRowIndexes.value.splice(targetIndexOfSelectedRowIndexes, 1);
+          if (selectedCellCoordinates.value.length || selectedCellCoordinatesInRange.value.length) {
+            if (startCell) {
+              Reflect.deleteProperty(startCell, 'isStart');
+            }
+            if (endCellIndex > -1) {
+              Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
+            }
+            if (selectedCellCoordinates.value[targetIndexOfSelectedCells]?.inRange) {
+              selectedCellCoordinates.value[targetIndexOfSelectedCells].isStart = true;
+              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
+            } else if (selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells]?.inRange) {
+              selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells].isStart = true;
+              selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.slice();
             } else {
-              selectedRowIndexes.value.push(row.index);
+              // todo: 样式有问题
+              selectedCellCoordinates.value.push({ ...coordinate });
             }
           } else {
-            selectedRowIndexes.value = [row.index];
+            selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
         case 'shift':
-          if (selectedRowIndexes.value.length) {
-            if (!startRowOfShiftSelectRow) {
-              startRowOfShiftSelectRow = last(selectedRowIndexes.value)!;
+          if (selectedCellCoordinates.value.length) {
+            // 把所有inRange清空但起点要保留，不然无法生成新的范围
+            selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.filter(item => item.isStart);
+            selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => !item.inRange || item.isStart);
+            if (!startCell) {
+              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
+              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].inRange = true;
+              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
             }
-            // 以startRowOfShiftSelectRow对应的index为起点，之前的保留下来，后面的去掉
-            const startIndex = selectedRowIndexes.value.findIndex(item => item === startRowOfShiftSelectRow);
-            const remainRows = take(selectedRowIndexes.value, startIndex + 1); // 取前面的 startIndex + 1 个元素
-            const lastOfRemainRow = last(remainRows)!;
-            selectedRowIndexes.value = remainRows.concat(genIndexesFromRange([lastOfRemainRow, row.index]));
+            if (endCellIndex > -1) {
+              // todo: inRange ？？
+              // Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
+              selectedCellCoordinates.value.splice(endCellIndex, 1);
+            }
+            if (targetIndexOfSelectedCells > -1) {
+              // 直接改.isEnd  不会触发响应式
+              selectedCellCoordinates.value[targetIndexOfSelectedCells] = { ...coordinate, isEnd: true, inRange: true };
+            } else {
+              selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
+            }
             getSelection()!.removeAllRanges();
           } else {
-            selectedRowIndexes.value = [row.index];
+            selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
         default:
-          startRowOfShiftSelectRow = undefined;
-          if (selectedRowIndexes.value.length === 1 && targetIndexOfSelectedRowIndexes === 0) {
-            selectedRowIndexes.value = [];
+          selectedCellCoordinatesInRange.value = [];
+          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
+            selectedCellCoordinates.value = [];
           } else {
-            selectedRowIndexes.value = [row.index];
+            selectedCellCoordinates.value = [{ ...coordinate }];
           }
           break;
       }
-      // console.log('selectedRowIndexes', selectedRowIndexes.value);
+      // console.log('selectedCellCoordinates', selectedCellCoordinates);
     }
+
+    provide(TableRootKey, {
+      rowKey: props.rowKey,
+      slots,
+      highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
+      handleTableCellClick,
+      addCellCoordinatesInRange,
+    });
 
     const init = () => {
       tableData.value = props.data || [];
@@ -325,9 +286,6 @@ export default defineComponent({
     watch(() => props.data, () => {
       init();
     });
-   /* watch(selectedCellCoordinatesInRange, (newVal) => {
-      console.log('wat selectedCellCoordinatesInRange', newVal, newVal.leng);
-    }, { deep: true });*/
     return {
       hfStyle,
       bodyStyle,
