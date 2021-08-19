@@ -1,6 +1,6 @@
 import {computed, PropType} from "vue";
-import {CellStyle, ClickType, ColumnOptions, FixTypes, TableDataOfSelected, TableStyle} from "./types";
-import {findIndex, findLastIndex, sumBy} from "lodash-es";
+import {CellCoordinate, CellStyle, ClickType, ColumnOptions, FixTypes, TableDataOfSelected, TableStyle} from "./types";
+import {findIndex, findLastIndex, orderBy, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
 import {WrapWithUndefined} from "../utils/types";
 
@@ -63,4 +63,10 @@ function getSelectedCellIndex(selectedCells: TableDataOfSelected[], x: number, y
   return selectedCells.findIndex(item => item.x === x && item.y === y);
 }
 
-export { commonProps, getCellStyle, getClickType, getSelectedCellIndex };
+function isInRangeOfCoordinates(range: [CellCoordinate, CellCoordinate], target: CellCoordinate): boolean {
+  const rowRange = orderBy([range[0].x, range[1].x]);
+  const colRange = orderBy([range[0].y, range[1].y]);
+  return (target.x >= rowRange[0] && target.x <= rowRange[1]) && (target.y >= colRange[0] && target.y <= colRange[1]);
+}
+
+export { commonProps, getCellStyle, getClickType, getSelectedCellIndex, isInRangeOfCoordinates };

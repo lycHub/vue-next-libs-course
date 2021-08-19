@@ -95,7 +95,7 @@ export default defineComponent({
     const selectedCellCoordinates = ref<CellCoordinate[]>([]);
 
     // shift选择时，起点的索引
-    let startCellOfShiftCellCoordinates: WrapWithUndefined<CellCoordinate>;
+    // let startCellOfShiftCellCoordinates: WrapWithUndefined<CellCoordinate>;
 
     const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
       if (props.selectMode !== 'cell') return;
@@ -105,7 +105,7 @@ export default defineComponent({
       // console.log('targetIndexOfSelectedCells', targetIndexOfSelectedCells);
       switch (clickType) {
         case 'ctrl':
-          startCellOfShiftCellCoordinates = undefined;
+          // startCellOfShiftCellCoordinates = undefined;
           if (selectedCellCoordinates.value.length) {
             if (targetIndexOfSelectedCells > -1) {
               selectedCellCoordinates.value.splice(targetIndexOfSelectedCells, 1);
@@ -117,22 +117,25 @@ export default defineComponent({
           }
           break;
         case 'shift':
-         /* if (selectedRowIndexes.value.length) {
-            if (!startRowOfShiftSelectRow) {
-              startRowOfShiftSelectRow = last(selectedRowIndexes.value)!;
+          if (selectedCellCoordinates.value.length) {
+            const startCell = selectedCellCoordinates.value.find(item => item.isStart);
+            if (!startCell) {
+              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
             }
-            // 以startRowOfShiftSelectRow对应的index为起点，之前的保留下来，后面的去掉
-            const startIndex = selectedRowIndexes.value.findIndex(item => item === startRowOfShiftSelectRow);
+            selectedCellCoordinates.value.push({ ...coordinate, isEnd: true });
+            // genCoordinatesFromRange([startCellOfShiftCellCoordinates, coordinate]);
+            // 以startCellOfShiftCellCoordinates对应的index为起点，之前的保留下来，后面的去掉
+            /*const startIndex = getSelectedCellIndex(selectedCellCoordinates.value, startCellOfShiftCellCoordinates.x, startCellOfShiftCellCoordinates.y);
             const remainRows = take(selectedRowIndexes.value, startIndex + 1); // 取前面的 startIndex + 1 个元素
             const lastOfRemainRow = last(remainRows)!;
-            selectedRowIndexes.value = remainRows.concat(genIndexesFromRange([lastOfRemainRow, row.index]));
+            selectedRowIndexes.value = remainRows.concat(genIndexesFromRange([lastOfRemainRow, row.index]));*/
             getSelection()!.removeAllRanges();
           } else {
-            selectedRowIndexes.value = [row.index];
-          }*/
+            selectedCellCoordinates.value = [coordinate];
+          }
           break;
         default:
-          startCellOfShiftCellCoordinates = undefined;
+          // startCellOfShiftCellCoordinates = undefined;
           if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCellCoordinates.value = [];
           } else {
