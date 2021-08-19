@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
-import {orderBy, partition, range, sum, sumBy} from "lodash-es";
+import {last, orderBy, partition, range, sum, sumBy, take} from "lodash-es";
 import ATableHead from './thead.vue';
 import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
@@ -81,6 +81,9 @@ export default defineComponent({
 
     // 保存选中的行
     const selectedRowIndexes = ref<number[]>([]);
+
+    // shift选择时，起点的索引
+    let startRowOfShiftSelectRow: WrapWithUndefined<number>;
 
     // 保存选中的单元格
     const selectedCells = ref<TableDataOfSelected[]>([]);
@@ -224,6 +227,7 @@ export default defineComponent({
       const targetIndexOfSelectedRowIndexes = selectedRowIndexes.value.findIndex(item => item === row.index);
       switch (row.clickType) {
         case 'ctrl':
+          startRowOfShiftSelectRow = undefined;
           if (selectedRowIndexes.value.length) {
             if (targetIndexOfSelectedRowIndexes > -1) {
               selectedRowIndexes.value.splice(targetIndexOfSelectedRowIndexes, 1);
@@ -236,13 +240,22 @@ export default defineComponent({
           break;
         case 'shift':
           if (selectedRowIndexes.value.length) {
-            selectedRowIndexes.value = genIndexesFromRange([selectedRowIndexes.value[0], row.index]);
+            // debugger;
+            if (!startRowOfShiftSelectRow) {
+              startRowOfShiftSelectRow = last(selectedRowIndexes.value)!;
+            }
+            // 以startRowOfShiftSelectRow对应的index为起点，之前的保留下来，后面的去掉
+            const startIndex = selectedRowIndexes.value.findIndex(item => item === startRowOfShiftSelectRow);
+            const remainRows = take(selectedRowIndexes.value, startIndex + 1); // 取前面的 startIndex + 1 个元素
+            const lastOfRemainRow = last(remainRows)!;
+            selectedRowIndexes.value = remainRows.concat(genIndexesFromRange([lastOfRemainRow, row.index]));
             getSelection()!.removeAllRanges();
           } else {
             selectedRowIndexes.value = [row.index];
           }
           break;
         default:
+          startRowOfShiftSelectRow = undefined;
           if (selectedRowIndexes.value.length === 1 && targetIndexOfSelectedRowIndexes === 0) {
             selectedRowIndexes.value = [];
           } else {

@@ -17,7 +17,7 @@ import {genTableData} from "./mock";
   export default defineComponent({
     name: "TableDemo",
     setup() {
-      const data = ref<TableData[]>(genTableData(3));
+      const data = ref<TableData[]>(genTableData(13));
       const changeTableData = () => {
         data.value = genTableData(10);
       }
