@@ -1,12 +1,15 @@
 import {InjectionKey, Ref} from "vue";
 import {Slots} from "@vue/runtime-core";
-import {CellCoordinate} from "./types";
+import {CellCoordinate, Coordinate} from "./types";
+import {WrapWithUndefined} from "../utils/types";
 
 interface TableRootCtx {
   rowKey: string;
   slots: Slots;
   highCells: Ref<CellCoordinate[]>;
+  mouseCoordinate: Ref<WrapWithUndefined<Coordinate>>;
   handleTableCellClick(cell: CellCoordinate, event: MouseEvent): void;
+  handleTableCellMousedown(cell: CellCoordinate, event: MouseEvent): void;
   addCellCoordinatesInRange(coordinate: CellCoordinate): void
 }
 

@@ -1,5 +1,14 @@
 import {computed, PropType} from "vue";
-import {CellCoordinate, CellStyle, ClickType, ColumnOptions, FixTypes, TableDataOfSelected, TableStyle} from "./types";
+import {
+  CellCoordinate,
+  CellStyle,
+  ClickType,
+  ColumnOptions,
+  Coordinate,
+  FixTypes,
+  TableDataOfSelected,
+  TableStyle
+} from "./types";
 import {findIndex, findLastIndex, orderBy, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
 import {WrapWithUndefined} from "../utils/types";
@@ -70,4 +79,8 @@ function isInRangeOfCoordinates(range: [CellCoordinate, CellCoordinate], target:
   return (target.x >= rowRange[0] && target.x <= rowRange[1]) && (target.y >= colRange[0] && target.y <= colRange[1]);
 }
 
-export { commonProps, getCellStyle, getClickType, getSelectedCellIndex, isInRangeOfCoordinates };
+function isInRangeOfMouseCoordinate(mouseCoordinate: Coordinate, cellCoordinate: Coordinate): boolean {
+  return mouseCoordinate.x > cellCoordinate.x && mouseCoordinate.y > cellCoordinate.y;
+}
+
+export { commonProps, getCellStyle, getClickType, getSelectedCellIndex, isInRangeOfCoordinates, isInRangeOfMouseCoordinate };

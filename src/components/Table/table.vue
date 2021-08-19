@@ -10,7 +10,10 @@
         </table>
       </div>
 
-      <div :class="`ant-table-section sec-body ${ selectMode ? 'select-mode' : '' }`" :style="bodyStyle" @scroll="handleBodyScroll">
+      <div
+        class="ant-table-section sec-body"
+        :style="bodyStyle"
+        @scroll="handleBodyScroll">
         <table class="ant-table" cellSpacing="0" :style="tableStyle">
           <colgroup>
             <col v-for="item of cols" :width="item" />
@@ -38,7 +41,7 @@ import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
 import {
   CellCoordinate,
-  ColumnOptions,
+  ColumnOptions, Coordinate,
   SelectedRow,
   SelectMode,
   TableData
@@ -94,6 +97,8 @@ export default defineComponent({
     // 保存范围内被选中的单元格坐标
     const selectedCellCoordinatesInRange = ref<CellCoordinate[]>([]);
 
+    const moving = ref(false);
+
     const bodyHeadDom = (): Partial<TableSectionEls> => {
       if (tableRootHtml.value instanceof HTMLElement) {
         const head = <HTMLElement>tableRootHtml.value.querySelector('.sec-header') || undefined; // .table-head
@@ -123,10 +128,21 @@ export default defineComponent({
     });
 
     const bodyStyle = computed(() => { // 这里本是方法
-      const result: { overflow: string; maxHeight?: string; } = { overflow: 'auto' };
+      const result: {
+        overflow: string;
+        cursor: string;
+        userSelect: string;
+        maxHeight?: string;
+      } = { overflow: 'auto', cursor: 'auto', userSelect: 'auto' };
       if (separateHeight.value) {
         const { head } = bodyHeadDom();
         result.maxHeight = props.maxHeight - (head?.clientHeight || 0) + 'px';
+      }
+      if (props.selectMode) {
+        result.cursor = 'pointer';
+      }
+      if (moving.value) {
+        result.userSelect = 'none';
       }
       return result;
     });
@@ -197,7 +213,9 @@ export default defineComponent({
     }
 
     const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
-      if (props.selectMode !== 'cell') return;
+      console.log('cell click');
+      // debugger;
+      if (props.selectMode !== 'cell' || moving.value) return;
       event.stopPropagation();
       const clickType = getClickType(event);
       const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
@@ -254,6 +272,7 @@ export default defineComponent({
           }
           break;
         default:
+          console.log('dan click');
           selectedCellCoordinatesInRange.value = [];
           if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCellCoordinates.value = [];
@@ -265,11 +284,40 @@ export default defineComponent({
       // console.log('selectedCellCoordinates', selectedCellCoordinates);
     }
 
+    const mouseCoordinate = ref<WrapWithUndefined<Coordinate>>();
+    const handleBodyMousemove = (event: MouseEvent) => {
+      mouseCoordinate.value = { x: event.clientX, y: event.clientY };
+    }
+
+    const handleMouseup = (tableBody: HTMLElement) => {
+      // console.log('handleMouseup');
+      tableBody.removeEventListener('mousemove', handleBodyMousemove);
+      moving.value = false;
+    }
+
+
+    const handleTableCellMousedown = (coordinate: CellCoordinate, event: MouseEvent) => {
+      // console.log('handleTableCellMousedown');
+      // event.stopPropagation();
+      if (props.selectMode === 'cell') {
+        moving.value = true;
+        // selectedCellCoordinatesInRange.value = [];
+        // selectedCellCoordinates.value = [coordinate];
+        const { body } = bodyHeadDom();
+        if (body) {
+          body.addEventListener('mousemove', handleBodyMousemove);
+          addEventListener('mouseup', handleMouseup.bind(null, body));
+        }
+      }
+    }
+
     provide(TableRootKey, {
       rowKey: props.rowKey,
       slots,
       highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
+      mouseCoordinate,
       handleTableCellClick,
+      handleTableCellMousedown,
       addCellCoordinatesInRange,
     });
 
@@ -287,8 +335,10 @@ export default defineComponent({
       bodyStyle,
       tableStyle,
       tableRootHtml,
+      moving,
       cols,
       tableData,
+      handleMouseup,
       handleBodyScroll,
       handleRowClick,
       scrollBoundary,
@@ -342,9 +392,6 @@ export default defineComponent({
             background-color: $assist-color;
           }
         }
-      }
-      .#{$ant-pre}table-section.select-mode {
-        cursor: pointer;
       }
     }
   }

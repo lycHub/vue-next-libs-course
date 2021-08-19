@@ -1,5 +1,5 @@
 <template>
-  <td :class="cellCls" :style="cellStyle(colIndex)" @click="clickCell">
+  <td ref="rootHtml" :class="cellCls" :style="cellStyle(colIndex)" @click="clickCell" @mousedown="mousedownCell">
     <render-cell v-if="column.render" :render-func="column.render" :column="column" :data="data" :index="index" />
     <render-slot v-else-if="column.slot" :column="column" :data="data" :index="index" />
     <span v-else class="cell-text">{{ data[column['key']] }}</span>
@@ -11,8 +11,16 @@ import {computed, defineComponent, inject, PropType, ref, watch} from 'vue';
 import RenderCell from './render';
 import RenderSlot from './slot';
 import {CellStyle, TableData} from "./types";
-import {commonProps, getCellStyle, getClickType, getSelectedCellIndex, isInRangeOfCoordinates} from "./uses";
+import {
+  commonProps,
+  getCellStyle,
+  getClickType,
+  getSelectedCellIndex,
+  isInRangeOfCoordinates,
+  isInRangeOfMouseCoordinate
+} from "./uses";
 import {TableRootKey} from "./injection";
+import {WrapWithUndefined} from "../utils/types";
 
   export default defineComponent({
     name: 'ATableCell',
@@ -57,6 +65,20 @@ import {TableRootKey} from "./injection";
         }
       });
 
+      const rootHtml = ref<WrapWithUndefined<HTMLTableDataCellElement>>();
+      watch(tableSlots.mouseCoordinate, coordinate => {
+        // console.log('wat mouseCoordinate', coordinate); // getBoundingClientRect
+        if (coordinate && rootHtml.value) {
+          const { x, y } = rootHtml.value.getBoundingClientRect();
+          const selected = isInRangeOfMouseCoordinate(coordinate, { x, y });
+          // console.log('selected', selected);
+          // todo: 这里应该执行shift click的逻辑, 可能还要手动设置isStart
+          /*if (selected) {
+            tableSlots.addCellCoordinatesInRange({ x: props.index, y: props.colIndex, inRange: true });
+          }*/
+        }
+      });
+
       const cellCls = computed(() => {
         let result = 'table-cell';
         if (selected.value) {
@@ -70,7 +92,10 @@ import {TableRootKey} from "./injection";
       const clickCell = (event: MouseEvent) => {
         tableSlots.handleTableCellClick({ x: props.index, y: props.colIndex }, event);
       }
-      return { cellStyle, column, clickCell, cellCls };
+      const mousedownCell = (event: MouseEvent) => {
+        tableSlots.handleTableCellMousedown({ x: props.index, y: props.colIndex }, event);
+      }
+      return { cellStyle, column, clickCell, mousedownCell, cellCls, rootHtml };
     }
   })
 </script>
