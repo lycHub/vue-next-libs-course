@@ -18,7 +18,7 @@ const baseOutput = format => ({
 export default ({ format }) => {
   const output = format === 'esm' ? baseOutput(format) : {
     ...baseOutput(format),
-    name: 'vue-next-libs',
+    name: 'VueNextUi',
     exports: 'named',
     globals: {
       vue: 'Vue'

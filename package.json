@@ -10,7 +10,7 @@
   "scripts": {
     "serve": "vue-cli-service serve --port 4200",
     "build:demo": "vue-cli-service build",
-    "build:lib:cli": "vue-cli-service build --target lib --dest lib ./src/components/index.ts",
+    "build:lib:cli": "vue-cli-service build --target lib --name VueNextUi --dest lib ./src/components/index.ts",
     "build:esm": "rollup --format esm -c build/rollup.config.js",
     "build:umd": "rollup --format umd -c build/rollup.config.js",
     "build:types": "tsc --project src/components/tsconfig.json",
@@ -45,6 +45,7 @@
     "style-resources-loader": "^1.4.1",
     "typescript": "~4.1.5",
     "vue": "^3.2.3",
-    "vue-cli-plugin-style-resources-loader": "~0.1.5"
+    "vue-cli-plugin-style-resources-loader": "~0.1.5",
+    "vue-tsc": "^0.2.3"
   }
 }

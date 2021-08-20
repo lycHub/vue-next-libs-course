@@ -10,10 +10,7 @@
         </table>
       </div>
 
-      <div
-        class="ant-table-section sec-body"
-        :style="bodyStyle"
-        @scroll="handleBodyScroll">
+      <div class="ant-table-section sec-body" :style="bodyStyle"  @scroll="handleBodyScroll">
         <table class="ant-table" cellSpacing="0" :style="tableStyle">
           <colgroup>
             <col v-for="item of cols" :width="item" />

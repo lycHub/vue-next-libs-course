@@ -3,7 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationDir": "../../lib/typings"
+    "declarationDir": "../../lib/typings",
   },
-  "include": ["."]
+  "include": [".", "../shims-vue.d.ts"]
 }
