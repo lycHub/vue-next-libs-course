@@ -97,8 +97,6 @@ export default defineComponent({
     // 保存范围内被选中的单元格坐标
     const selectedCellCoordinatesInRange = ref<CellCoordinate[]>([]);
 
-    const moving = ref(false);
-
     const bodyHeadDom = (): Partial<TableSectionEls> => {
       if (tableRootHtml.value instanceof HTMLElement) {
         const head = <HTMLElement>tableRootHtml.value.querySelector('.sec-header') || undefined; // .table-head
@@ -127,6 +125,7 @@ export default defineComponent({
       return result;
     });
 
+    const moving = ref(false);
     const bodyStyle = computed(() => { // 这里本是方法
       const result: {
         overflow: string;
@@ -272,9 +271,8 @@ export default defineComponent({
           }
           break;
         default:
-          console.log('dan click');
-          selectedCellCoordinatesInRange.value = [];
-          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
+          // selectedCellCoordinatesInRange.value = [];
+          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0 && !selectedCellCoordinates.value[0].isStart) {
             selectedCellCoordinates.value = [];
           } else {
             selectedCellCoordinates.value = [coordinate];
@@ -285,24 +283,57 @@ export default defineComponent({
     }
 
     const mouseCoordinate = ref<WrapWithUndefined<Coordinate>>();
+    const mousedownStartCoordinate = ref<WrapWithUndefined<CellCoordinate>>();
     const handleBodyMousemove = (event: MouseEvent) => {
-      mouseCoordinate.value = { x: event.clientX, y: event.clientY };
+      if (moving.value) {
+        mouseCoordinate.value = { x: event.clientX, y: event.clientY };
+      }
     }
+
+    const moveInRange = (coordinate: CellCoordinate) => {
+      if (mousedownStartCoordinate.value && coordinate) {
+        selectedCellCoordinatesInRange.value = [];
+        if (!selectedCellCoordinates.value.length) {
+          selectedCellCoordinates.value = [{ ...mousedownStartCoordinate.value, isStart: true, inRange: true }];
+        }
+        const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+        if (endCellIndex > -1) {
+          selectedCellCoordinates.value.splice(endCellIndex, 1);
+        }
+        selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
+      }
+    }
+
+
+    /*const moveInRange = (coordinate: CellCoordinate) => {
+      // console.log('moveInRange', coordinate);
+      const valid = selectedCellCoordinates.value.length === 1 && selectedCellCoordinates.value[0].isStart && coordinate;
+      if (valid) {
+        selectedCellCoordinatesInRange.value = [];
+        const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+        if (endCellIndex > -1) {
+          selectedCellCoordinates.value.splice(endCellIndex, 1);
+        }
+        selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
+      }
+    }*/
 
     const handleMouseup = (tableBody: HTMLElement) => {
       // console.log('handleMouseup');
       tableBody.removeEventListener('mousemove', handleBodyMousemove);
       moving.value = false;
+      mousedownStartCoordinate.value = undefined;
     }
 
 
-    const handleTableCellMousedown = (coordinate: CellCoordinate, event: MouseEvent) => {
-      // console.log('handleTableCellMousedown');
+    const handleCellMousedown = (coordinate: CellCoordinate, event: MouseEvent) => {
+      // console.log('handleCellMousedown');
       // event.stopPropagation();
       if (props.selectMode === 'cell') {
         moving.value = true;
+        mousedownStartCoordinate.value = coordinate;
         // selectedCellCoordinatesInRange.value = [];
-        // selectedCellCoordinates.value = [coordinate];
+        // selectedCellCoordinates.value = [{ ...coordinate, isStart: true, inRange: true }];
         const { body } = bodyHeadDom();
         if (body) {
           body.addEventListener('mousemove', handleBodyMousemove);
@@ -317,8 +348,9 @@ export default defineComponent({
       highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
       mouseCoordinate,
       handleTableCellClick,
-      handleTableCellMousedown,
+      handleCellMousedown,
       addCellCoordinatesInRange,
+      moveInRange,
     });
 
     const init = () => {

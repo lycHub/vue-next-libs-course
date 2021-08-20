@@ -49,7 +49,7 @@ import {WrapWithUndefined} from "../utils/types";
       const selected = ref(false);
       const isStart = ref(false);
       watch(tableSlots.highCells, highCells => {
-        // console.log('wat tableSlots.highCells', highCells);
+        console.log('wat tableSlots.highCells', highCells);
         const targetIndex = getSelectedCellIndex(highCells, props.index, props.colIndex);
         const startCell = highCells.find(item => item.isStart);
         const endCell = highCells.find(item => item.isEnd);
@@ -73,9 +73,9 @@ import {WrapWithUndefined} from "../utils/types";
           const selected = isInRangeOfMouseCoordinate(coordinate, { x, y });
           // console.log('selected', selected);
           // todo: 这里应该执行shift click的逻辑, 可能还要手动设置isStart
-          /*if (selected) {
-            tableSlots.addCellCoordinatesInRange({ x: props.index, y: props.colIndex, inRange: true });
-          }*/
+          if (selected) {
+            tableSlots.moveInRange({ x: props.index, y: props.colIndex });
+          }
         }
       });
 
@@ -93,7 +93,7 @@ import {WrapWithUndefined} from "../utils/types";
         tableSlots.handleTableCellClick({ x: props.index, y: props.colIndex }, event);
       }
       const mousedownCell = (event: MouseEvent) => {
-        tableSlots.handleTableCellMousedown({ x: props.index, y: props.colIndex }, event);
+        tableSlots.handleCellMousedown({ x: props.index, y: props.colIndex }, event);
       }
       return { cellStyle, column, clickCell, mousedownCell, cellCls, rootHtml };
     }
