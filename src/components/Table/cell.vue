@@ -1,5 +1,11 @@
 <template>
-  <td ref="rootHtml" :class="cellCls" :style="cellStyle(colIndex)" @click="clickCell" @mousedown="mousedownCell">
+  <td
+    ref="rootHtml"
+    :class="cellCls"
+    :style="cellStyle(colIndex)"
+    @click="clickCell"
+    @mousedown="mousedownCell"
+    @mouseenter="mouseenterCell">
     <render-cell v-if="column.render" :render-func="column.render" :column="column" :data="data" :index="index" />
     <render-slot v-else-if="column.slot" :column="column" :data="data" :index="index" />
     <span v-else class="cell-text">{{ data[column['key']] }}</span>
@@ -49,7 +55,7 @@ import {WrapWithUndefined} from "../utils/types";
       const selected = ref(false);
       const isStart = ref(false);
       watch(tableSlots.highCells, highCells => {
-        console.log('wat tableSlots.highCells', highCells);
+        // console.log('wat tableSlots.highCells', highCells);
         const targetIndex = getSelectedCellIndex(highCells, props.index, props.colIndex);
         const startCell = highCells.find(item => item.isStart);
         const endCell = highCells.find(item => item.isEnd);
@@ -66,18 +72,6 @@ import {WrapWithUndefined} from "../utils/types";
       });
 
       const rootHtml = ref<WrapWithUndefined<HTMLTableDataCellElement>>();
-      watch(tableSlots.mouseCoordinate, coordinate => {
-        // console.log('wat mouseCoordinate', coordinate); // getBoundingClientRect
-        if (coordinate && rootHtml.value) {
-          const { x, y } = rootHtml.value.getBoundingClientRect();
-          const selected = isInRangeOfMouseCoordinate(coordinate, { x, y });
-          // console.log('selected', selected);
-          // todo: 这里应该执行shift click的逻辑, 可能还要手动设置isStart
-          if (selected) {
-            tableSlots.moveInRange({ x: props.index, y: props.colIndex });
-          }
-        }
-      });
 
       const cellCls = computed(() => {
         let result = 'table-cell';
@@ -93,9 +87,12 @@ import {WrapWithUndefined} from "../utils/types";
         tableSlots.handleTableCellClick({ x: props.index, y: props.colIndex }, event);
       }
       const mousedownCell = (event: MouseEvent) => {
-        tableSlots.handleCellMousedown({ x: props.index, y: props.colIndex }, event);
+        tableSlots.handleCellMousedown({ x: props.index, y: props.colIndex });
       }
-      return { cellStyle, column, clickCell, mousedownCell, cellCls, rootHtml };
+      const mouseenterCell = (event: MouseEvent) => {
+        tableSlots.handleCellMouseenter({ x: props.index, y: props.colIndex });
+      }
+      return { cellStyle, column, clickCell, mousedownCell, mouseenterCell, cellCls, rootHtml };
     }
   })
 </script>

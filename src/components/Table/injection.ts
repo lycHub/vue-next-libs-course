@@ -7,11 +7,10 @@ interface TableRootCtx {
   rowKey: string;
   slots: Slots;
   highCells: Ref<CellCoordinate[]>;
-  mouseCoordinate: Ref<WrapWithUndefined<Coordinate>>;
   handleTableCellClick(cell: CellCoordinate, event: MouseEvent): void;
-  handleCellMousedown(cell: CellCoordinate, event: MouseEvent): void;
-  addCellCoordinatesInRange(coordinate: CellCoordinate): void
-  moveInRange(coordinate: CellCoordinate): void
+  handleCellMousedown(cell: CellCoordinate): void;
+  handleCellMouseenter(cell: CellCoordinate): void;
+  addCellCoordinatesInRange(coordinate: CellCoordinate): void;
 }
 
 const TableRootKey: InjectionKey<TableRootCtx> = Symbol('Table slots');

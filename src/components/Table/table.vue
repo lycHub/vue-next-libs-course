@@ -271,8 +271,8 @@ export default defineComponent({
           }
           break;
         default:
-          // selectedCellCoordinatesInRange.value = [];
-          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0 && !selectedCellCoordinates.value[0].isStart) {
+          selectedCellCoordinatesInRange.value = [];
+          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
             selectedCellCoordinates.value = [];
           } else {
             selectedCellCoordinates.value = [coordinate];
@@ -281,64 +281,38 @@ export default defineComponent({
       }
       // console.log('selectedCellCoordinates', selectedCellCoordinates);
     }
-
-    const mouseCoordinate = ref<WrapWithUndefined<Coordinate>>();
     const mousedownStartCoordinate = ref<WrapWithUndefined<CellCoordinate>>();
-    const handleBodyMousemove = (event: MouseEvent) => {
+
+    const handleCellMouseenter = (coordinate: CellCoordinate) => {
       if (moving.value) {
-        mouseCoordinate.value = { x: event.clientX, y: event.clientY };
+        if (mousedownStartCoordinate.value && coordinate) {
+          selectedCellCoordinatesInRange.value = [];
+          selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => item.isStart);
+          if (!selectedCellCoordinates.value.length) {
+            selectedCellCoordinates.value = [{ ...mousedownStartCoordinate.value, isStart: true, inRange: true }];
+          }
+          const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+          if (endCellIndex > -1) {
+            selectedCellCoordinates.value.splice(endCellIndex, 1);
+          }
+          selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
+        }
       }
     }
 
-    const moveInRange = (coordinate: CellCoordinate) => {
-      if (mousedownStartCoordinate.value && coordinate) {
-        selectedCellCoordinatesInRange.value = [];
-        if (!selectedCellCoordinates.value.length) {
-          selectedCellCoordinates.value = [{ ...mousedownStartCoordinate.value, isStart: true, inRange: true }];
-        }
-        const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
-        if (endCellIndex > -1) {
-          selectedCellCoordinates.value.splice(endCellIndex, 1);
-        }
-        selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
-      }
-    }
-
-
-    /*const moveInRange = (coordinate: CellCoordinate) => {
-      // console.log('moveInRange', coordinate);
-      const valid = selectedCellCoordinates.value.length === 1 && selectedCellCoordinates.value[0].isStart && coordinate;
-      if (valid) {
-        selectedCellCoordinatesInRange.value = [];
-        const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
-        if (endCellIndex > -1) {
-          selectedCellCoordinates.value.splice(endCellIndex, 1);
-        }
-        selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
-      }
-    }*/
-
-    const handleMouseup = (tableBody: HTMLElement) => {
-      // console.log('handleMouseup');
-      tableBody.removeEventListener('mousemove', handleBodyMousemove);
+    const handleMouseup = () => {
       moving.value = false;
       mousedownStartCoordinate.value = undefined;
     }
 
 
-    const handleCellMousedown = (coordinate: CellCoordinate, event: MouseEvent) => {
-      // console.log('handleCellMousedown');
-      // event.stopPropagation();
+    const handleCellMousedown = (coordinate: CellCoordinate) => {
       if (props.selectMode === 'cell') {
         moving.value = true;
+        selectedCellCoordinates.value = [];
+        selectedCellCoordinatesInRange.value = [];
         mousedownStartCoordinate.value = coordinate;
-        // selectedCellCoordinatesInRange.value = [];
-        // selectedCellCoordinates.value = [{ ...coordinate, isStart: true, inRange: true }];
-        const { body } = bodyHeadDom();
-        if (body) {
-          body.addEventListener('mousemove', handleBodyMousemove);
-          addEventListener('mouseup', handleMouseup.bind(null, body));
-        }
+        addEventListener('mouseup', handleMouseup);
       }
     }
 
@@ -346,11 +320,10 @@ export default defineComponent({
       rowKey: props.rowKey,
       slots,
       highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
-      mouseCoordinate,
       handleTableCellClick,
       handleCellMousedown,
+      handleCellMouseenter,
       addCellCoordinatesInRange,
-      moveInRange,
     });
 
     const init = () => {
@@ -417,7 +390,7 @@ export default defineComponent({
             }
             .table-cell.selected.is-start {
               background-color: unset;
-              border: 2px solid $assist-color;
+              border: 1px solid $assist-color;
             }
           }
           .table-row.selected {
