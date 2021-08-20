@@ -1,10 +1,11 @@
 import {InjectionKey, Ref} from "vue";
 import {Slots} from "@vue/runtime-core";
-import {CellCoordinate, Coordinate} from "./types";
+import {CellCoordinate, Coordinate, SelectMode} from "./types";
 import {WrapWithUndefined} from "../utils/types";
 
 interface TableRootCtx {
   rowKey: string;
+  selectMode: WrapWithUndefined<SelectMode>;
   slots: Slots;
   highCells: Ref<CellCoordinate[]>;
   handleTableCellClick(cell: CellCoordinate, event: MouseEvent): void;

@@ -287,10 +287,9 @@ export default defineComponent({
       if (moving.value) {
         if (mousedownStartCoordinate.value && coordinate) {
           selectedCellCoordinatesInRange.value = [];
-          selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => item.isStart);
-          if (!selectedCellCoordinates.value.length) {
-            selectedCellCoordinates.value = [{ ...mousedownStartCoordinate.value, isStart: true, inRange: true }];
-          }
+          // selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => item.isStart);
+          selectedCellCoordinates.value = [];
+          selectedCellCoordinates.value = [{ ...mousedownStartCoordinate.value, isStart: true, inRange: true }];
           const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
           if (endCellIndex > -1) {
             selectedCellCoordinates.value.splice(endCellIndex, 1);
@@ -307,17 +306,16 @@ export default defineComponent({
 
 
     const handleCellMousedown = (coordinate: CellCoordinate) => {
-      if (props.selectMode === 'cell') {
-        moving.value = true;
-        selectedCellCoordinates.value = [];
-        selectedCellCoordinatesInRange.value = [];
-        mousedownStartCoordinate.value = coordinate;
-        addEventListener('mouseup', handleMouseup);
-      }
+      moving.value = true;
+      // selectedCellCoordinates.value = [];
+      // selectedCellCoordinatesInRange.value = [];
+      mousedownStartCoordinate.value = coordinate;
+      addEventListener('mouseup', handleMouseup);
     }
 
     provide(TableRootKey, {
       rowKey: props.rowKey,
+      selectMode: props.selectMode,
       slots,
       highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
       handleTableCellClick,
@@ -388,7 +386,7 @@ export default defineComponent({
             .table-cell.selected {
               background-color: $assist-color;
             }
-            .table-cell.selected.is-start {
+            .table-cell.is-start {
               background-color: unset;
               border: 1px solid $assist-color;
             }

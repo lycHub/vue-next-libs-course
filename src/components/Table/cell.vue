@@ -86,11 +86,16 @@ import {WrapWithUndefined} from "../utils/types";
       const clickCell = (event: MouseEvent) => {
         tableSlots.handleTableCellClick({ x: props.index, y: props.colIndex }, event);
       }
-      const mousedownCell = (event: MouseEvent) => {
-        tableSlots.handleCellMousedown({ x: props.index, y: props.colIndex });
+      const mousedownCell = () => {
+        if (tableSlots.selectMode === 'cell') {
+          isStart.value = true;
+          tableSlots.handleCellMousedown({ x: props.index, y: props.colIndex });
+        }
       }
-      const mouseenterCell = (event: MouseEvent) => {
-        tableSlots.handleCellMouseenter({ x: props.index, y: props.colIndex });
+      const mouseenterCell = () => {
+        if (tableSlots.selectMode === 'cell') {
+          tableSlots.handleCellMouseenter({ x: props.index, y: props.colIndex });
+        }
       }
       return { cellStyle, column, clickCell, mousedownCell, mouseenterCell, cellCls, rootHtml };
     }
