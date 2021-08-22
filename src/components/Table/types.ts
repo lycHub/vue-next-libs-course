@@ -1,3 +1,6 @@
+import { CSSProperties } from '@vue/runtime-dom';
+import { PositionProperty } from 'csstype';
+
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
 type TableData = Record<string, any>;
@@ -28,8 +31,8 @@ interface TableStyle {
   width?: string;
 }
 
-interface CellStyle {
-  position: string;
+interface CellStyle extends CSSProperties {
+  position: PositionProperty;
   left: string;
   right: string;
   boxShadow: string;
