@@ -20,10 +20,8 @@ import {CellStyle, TableData} from "./types";
 import {
   commonProps,
   getCellStyle,
-  getClickType,
   getSelectedCellIndex,
-  isInRangeOfCoordinates,
-  isInRangeOfMouseCoordinate
+  isInRangeOfCoordinates
 } from "./uses";
 import {TableRootKey} from "./injection";
 import {WrapWithUndefined} from "../utils/types";
@@ -46,7 +44,7 @@ import {WrapWithUndefined} from "../utils/types";
         required: true
       },
     },
-    setup(props, { emit }) {
+    setup(props) {
       const tableSlots = inject(TableRootKey)!;
       const column = computed(() => props.columns[props.colIndex]);
       const cellStyle = (index: number): Partial<CellStyle> => {
