@@ -26,24 +26,22 @@ class ScrollService {
 
   // 横向滚动条是否到达边界
   hasReachHorizontalBoundary (el: HTMLElement, offset = 0): IsReachBoundary {
-    let result: IsReachBoundary = [false, false];
     if (el.scrollLeft <= offset) {
-      result = [true, false];
+      return [true, false];
     } else if (el.scrollLeft + el.clientWidth >= el.scrollWidth - offset) {
-      result = [false, true];
+      return [false, true];
     }
-    return result;
+    return [false, false];
   }
 
   // 纵向滚动条是否到达边界
   hasReachVerticalBoundary (el: HTMLElement, offset = 0): IsReachBoundary {
-    let result: IsReachBoundary = [false, false];
     if (el.scrollTop <= offset) {
-      result = [true, false];
+      return [true, false];
     } else if (el.scrollTop + el.clientHeight >= el.scrollHeight - offset) {
-      result = [false, true];
+      return [false, true];
     }
-    return result;
+    return [false, false];
   }
 
   // 获取滚动方向

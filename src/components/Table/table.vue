@@ -182,14 +182,23 @@ export default defineComponent({
       return props.columns.map((item, index) => widths[index]);
     });
 
+    const updateScrollBoundary = (state: IsReachBoundary) => {
+      for (let a = 0; a < state.length; a++) {
+        if (state[a] !== scrollBoundary.value[a]) {
+          scrollBoundary.value = state;
+          console.log('update');
+          break;
+        }
+      }
+    }
+
     const handleBodyScroll = (event: Event) => {
       const target = event.target as HTMLElement;
       const direction = ScrollServe.getDirection(target);
       if (direction === 'horizontal') {
         const { head } = bodyHeadDom();
-        scrollBoundary.value = ScrollServe.hasReachBoundary(target, 'horizontal');
         if (head) {
-          // console.log('head', head);
+          updateScrollBoundary(ScrollServe.hasReachBoundary(target, 'horizontal'));
           ScrollServe.setScroll(head, target.scrollLeft, false);
         }
         // ScrollServe.setScroll(this.$refs.tableFooter, target.scrollLeft, false);
@@ -209,7 +218,6 @@ export default defineComponent({
     }
 
     const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
-      console.log('cell click');
       // debugger;
       if (props.selectMode !== 'cell' || moving.value) return;
       event.stopPropagation();
@@ -349,7 +357,6 @@ export default defineComponent({
 </script>
 <style lang="scss">
   .#{$ant-pre}table-wrap {
-    background-color: $white-color;
     .#{$ant-pre}tables {
       overflow-x: auto;
       border: {
@@ -367,6 +374,7 @@ export default defineComponent({
           min-width: 100%;
           table-layout: fixed;
           .table-row {
+            background-color: $white-color;
             transition: background-color .2s ease-in-out;
             &:hover {
               background-color: $bg-prev-color;
@@ -378,6 +386,7 @@ export default defineComponent({
                 bottom: 1px solid $border-color;
                 right: 1px solid $border-color;
               }
+              background-color: inherit;
               transition: background-color .2s ease-in-out;
             }
             .table-cell.selected {

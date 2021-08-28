@@ -33,6 +33,7 @@ const commonProps = {
 
 
 function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBoundary: IsReachBoundary, index: number): Partial<CellStyle> {
+  console.log('getSc');
   const result: Partial<CellStyle> = {};
   const col = columns[index];
   const setBoxShadow = (colIndex: number, fixed: FixTypes): string => { // 暂时只考虑右边

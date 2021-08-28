@@ -16,8 +16,8 @@
 
 <script lang="tsx">
   import {defineComponent, PropType} from 'vue';
-  import {CellStyle, SelectMode, TableData} from "./types";
-  import {commonProps, getCellStyle, getClickType} from "./uses";
+  import {SelectMode, TableData} from "./types";
+  import {commonProps, getClickType} from "./uses";
   import {WrapWithUndefined} from "../utils/types";
   import Cell from './cell.vue';
 
@@ -47,15 +47,12 @@
         const selected = props.selectIndexes.findIndex(item => item === index) > -1;
         return `table-row ${ selected ? 'selected' : '' }`;
       };
-      const cellStyle = (index: number): Partial<CellStyle> => {
-        return getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index);
-      }
       const clickRow = (event: MouseEvent, index: number) => {
         const clickType = getClickType(event);
         // console.log('index', index, clickType);
         emit('rowClick', { index, clickType });
       }
-      return { cellStyle, clickRow, tableRowCls };
+      return { clickRow, tableRowCls };
     }
   })
 </script>

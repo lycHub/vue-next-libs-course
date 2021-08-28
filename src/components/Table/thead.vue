@@ -21,7 +21,7 @@ import {commonProps, getCellStyle} from "./uses";
     props: commonProps,
     setup(props, { emit }) {
       const cellStyle = (index: number): Partial<CellStyle> => {
-        return getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index);
+        return props.columns[index].fixed ? getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index) : {};
       }
       return { cellStyle };
     }

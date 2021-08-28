@@ -48,7 +48,7 @@ import {WrapWithUndefined} from "../utils/types";
       const tableSlots = inject(TableRootKey)!;
       const column = computed(() => props.columns[props.colIndex]);
       const cellStyle = (index: number): Partial<CellStyle> => {
-        return getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index);
+        return column.value.fixed ? getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index) : {};
       }
       const selected = ref(false);
       const isStart = ref(false);

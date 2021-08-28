@@ -17,7 +17,7 @@ import {genTableData} from "./mock";
   export default defineComponent({
     name: "TableDemo",
     setup() {
-      const data = ref<TableData[]>(genTableData(13));
+      const data = ref<TableData[]>(genTableData(333));
       const changeTableData = () => {
         data.value = genTableData(10);
       }
@@ -31,7 +31,8 @@ import {genTableData} from "./mock";
           {
             title: 'Name',
             key: 'name',
-            width: 200
+            width: 200,
+            fixed: 'left'
           },
           {
             title: 'Age',
@@ -61,6 +62,7 @@ import {genTableData} from "./mock";
           {
             title: 'Action',
             width: 120,
+            fixed: 'right',
             render: ({ data }: TableRenderFuncParams) => {
               // console.log('data', data);
               return <div class="table-acts">
