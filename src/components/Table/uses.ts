@@ -1,7 +1,7 @@
 import {computed, PropType} from "vue";
 import {
   CellCoordinate,
-  CellStyle,
+  ColStyle,
   ClickType,
   ColumnOptions,
   Coordinate,
@@ -23,6 +23,10 @@ const commonProps = {
     type: Object as PropType<TableStyle>,
     default: () => ({})
   },
+  colStyle: {
+    type: Array as PropType<Partial<ColStyle>[]>,
+    default: () => []
+  },
   scrollBoundary: {
     type: Array as unknown as PropType<IsReachBoundary>,
     default: () => [true, false]
@@ -32,18 +36,18 @@ const commonProps = {
 
 
 
-function getCellStyle(columns: ColumnOptions[], tableStyle: TableStyle, scrollBoundary: IsReachBoundary, index: number): Partial<CellStyle> {
+function getColStyle(columns: ColumnOptions[], tableStyle: TableStyle, index: number): Partial<ColStyle> {
   console.log('getSc');
-  const result: Partial<CellStyle> = {};
+  const result: Partial<ColStyle> = {};
   const col = columns[index];
   const setBoxShadow = (colIndex: number, fixed: FixTypes): string => { // 暂时只考虑右边
-    const boundary = fixed === 'left' ? scrollBoundary[0] : scrollBoundary[1];
-    const indexFunc = fixed === 'left' ? findLastIndex : findIndex;
+    // const boundary = fixed === 'left' ? scrollBoundary[0] : scrollBoundary[1];
+    // const indexFunc = fixed === 'left' ? findLastIndex : findIndex;
     const boxShadowXY = fixed === 'left' ? '2px 0 ' : '-2px 0 ';
-    const edgeFixedIndex = indexFunc(columns, { fixed });
+    // const edgeFixedIndex = indexFunc(columns, { fixed });
 
     // console.log('colIndex firstFixedIndex', colIndex, edgeFixedIndex);
-    return !boundary && colIndex === edgeFixedIndex ? boxShadowXY +'6px -2px rgb(0 0 0 / 20%)' : 'none';
+    return boxShadowXY +'6px -2px rgb(0 0 0 / 20%)';
   }
 
   if (tableStyle.width) {
@@ -80,8 +84,4 @@ function isInRangeOfCoordinates(range: [CellCoordinate, CellCoordinate], target:
   return (target.x >= rowRange[0] && target.x <= rowRange[1]) && (target.y >= colRange[0] && target.y <= colRange[1]);
 }
 
-function isInRangeOfMouseCoordinate(mouseCoordinate: Coordinate, cellCoordinate: Coordinate): boolean {
-  return mouseCoordinate.x > cellCoordinate.x && mouseCoordinate.y > cellCoordinate.y;
-}
-
-export { commonProps, getCellStyle, getClickType, getSelectedCellIndex, isInRangeOfCoordinates, isInRangeOfMouseCoordinate };
+export { commonProps, getColStyle, getClickType, getSelectedCellIndex, isInRangeOfCoordinates };

@@ -2,7 +2,7 @@
   <td
     ref="rootHtml"
     :class="cellCls"
-    :style="cellStyle(colIndex)"
+    :style="colStyle[colIndex]"
     @click="clickCell"
     @mousedown="mousedownCell"
     @mouseenter="mouseenterCell">
@@ -16,10 +16,9 @@
 import {computed, defineComponent, inject, PropType, ref, watch} from 'vue';
 import RenderCell from './render';
 import RenderSlot from './slot';
-import {CellStyle, TableData} from "./types";
+import {TableData} from "./types";
 import {
   commonProps,
-  getCellStyle,
   getSelectedCellIndex,
   isInRangeOfCoordinates
 } from "./uses";
@@ -47,11 +46,11 @@ import {WrapWithUndefined} from "../utils/types";
     setup(props) {
       const tableSlots = inject(TableRootKey)!;
       const column = computed(() => props.columns[props.colIndex]);
-      const cellStyle = (index: number): Partial<CellStyle> => {
-        return column.value.fixed ? getCellStyle(props.columns, props.tableStyle, props.scrollBoundary, index) : {};
-      }
       const selected = ref(false);
       const isStart = ref(false);
+      /*watch(() => props.ColStyle, newVal => {
+        console.log('wat colStyle', newVal);
+      }, { immediate: true })*/
       watch(tableSlots.highCells, highCells => {
         // console.log('wat tableSlots.highCells', highCells);
         const targetIndex = getSelectedCellIndex(highCells, props.index, props.colIndex);
@@ -95,7 +94,7 @@ import {WrapWithUndefined} from "../utils/types";
           tableSlots.handleCellMouseenter({ x: props.index, y: props.colIndex });
         }
       }
-      return { cellStyle, column, clickCell, mousedownCell, mouseenterCell, cellCls, rootHtml };
+      return { column, clickCell, mousedownCell, mouseenterCell, cellCls, rootHtml };
     }
   })
 </script>

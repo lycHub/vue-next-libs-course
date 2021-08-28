@@ -1,12 +1,13 @@
 <template>
   <div class="ant-table-wrap" ref="tableRootHtml">
+<!--    <p>ColStyle: {{ ColStyle }}</p>-->
     <div class="ant-tables">
       <div class="ant-table-section sec-header" :style="hfStyle">
         <table class="ant-table" cellSpacing="0" :style="tableStyle">
           <colgroup>
             <col v-for="item of cols" :width="item" />
           </colgroup>
-          <a-table-head :columns="columns" :tableStyle="tableStyle" :scrollBoundary="scrollBoundary" />
+          <a-table-head :columns="columns" :tableStyle="tableStyle" :colStyle="colStyle" :scrollBoundary="scrollBoundary" />
         </table>
       </div>
 
@@ -19,6 +20,7 @@
             :columns="columns"
             :data="tableData"
             :tableStyle="tableStyle"
+            :colStyle="colStyle"
             :row-key="rowKey"
             :scrollBoundary="scrollBoundary"
             :select-mode="selectMode"
@@ -31,13 +33,13 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
-import {last, partition, sum, sumBy, take} from "lodash-es";
+import {defineComponent, ref, computed, nextTick, PropType, watch, provide} from 'vue';
+import {partition, sum, sumBy} from "lodash-es";
 import ATableHead from './thead.vue';
 import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
 import {
-  CellCoordinate,
+  CellCoordinate, ColStyle,
   ColumnOptions, Coordinate,
   SelectedRow,
   SelectMode,
@@ -45,7 +47,7 @@ import {
 } from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
 import {TableRootKey} from "./injection";
-import {getClickType, getSelectedCellIndex} from "./uses";
+import {getColStyle, getClickType, getSelectedCellIndex} from "./uses";
 import {rowSelectStrategies} from "./select-row-strategies";
 
 interface TableSectionEls {
@@ -186,19 +188,23 @@ export default defineComponent({
       for (let a = 0; a < state.length; a++) {
         if (state[a] !== scrollBoundary.value[a]) {
           scrollBoundary.value = state;
-          console.log('update');
           break;
         }
       }
     }
 
+    const colStyle = computed<Partial<ColStyle>[]>(() => {
+      return props.columns.map((col, index) => {
+        return col.fixed ? getColStyle(props.columns, tableStyle.value, index) : {}
+      });
+    });
     const handleBodyScroll = (event: Event) => {
       const target = event.target as HTMLElement;
       const direction = ScrollServe.getDirection(target);
       if (direction === 'horizontal') {
         const { head } = bodyHeadDom();
         if (head) {
-          updateScrollBoundary(ScrollServe.hasReachBoundary(target, 'horizontal'));
+          // updateScrollBoundary(ScrollServe.hasReachBoundary(target, 'horizontal'))
           ScrollServe.setScroll(head, target.scrollLeft, false);
         }
         // ScrollServe.setScroll(this.$refs.tableFooter, target.scrollLeft, false);
@@ -339,6 +345,7 @@ export default defineComponent({
       init();
     });
     return {
+      colStyle,
       hfStyle,
       bodyStyle,
       tableStyle,

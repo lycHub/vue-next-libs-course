@@ -31,7 +31,7 @@ interface TableStyle {
   width?: string;
 }
 
-interface CellStyle extends CSSProperties {
+interface ColStyle extends CSSProperties {
   position: PositionProperty;
   left: string;
   right: string;
@@ -45,4 +45,4 @@ interface SelectedRow {
   clickType: ClickType;
 }
 
-export { TableDataOfSelected, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, CellStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { TableDataOfSelected, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
