@@ -349,7 +349,7 @@ export default defineComponent({
     const virtualBody = (): JSX.Element => {
       return <VirtualList
         class="ant-table-section sec-body"
-        ref="virtualListRef"
+        ref={ virtualListRef }
         style={ bodyStyle.value }
         items={ dataOfTr() }
         itemSize={54}
