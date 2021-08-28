@@ -7,7 +7,6 @@
       :columns="columns"
       :table-style="tableStyle"
       :col-style="colStyle"
-      :scroll-boundary="scrollBoundary"
       :data="row"
       :col-index="cIndex"
       :index="index" />

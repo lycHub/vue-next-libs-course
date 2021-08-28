@@ -26,10 +26,6 @@ const commonProps = {
   colStyle: {
     type: Array as PropType<Partial<ColStyle>[]>,
     default: () => []
-  },
-  scrollBoundary: {
-    type: Array as unknown as PropType<IsReachBoundary>,
-    default: () => [true, false]
   }
 }
 

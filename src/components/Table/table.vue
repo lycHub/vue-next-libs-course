@@ -7,7 +7,7 @@
           <colgroup>
             <col v-for="item of cols" :width="item" />
           </colgroup>
-          <a-table-head :columns="columns" :tableStyle="tableStyle" :colStyle="colStyle" :scrollBoundary="scrollBoundary" />
+          <a-table-head :columns="columns" :tableStyle="tableStyle" :colStyle="colStyle" />
         </table>
       </div>
 
@@ -22,7 +22,6 @@
             :tableStyle="tableStyle"
             :colStyle="colStyle"
             :row-key="rowKey"
-            :scrollBoundary="scrollBoundary"
             :select-mode="selectMode"
             :select-indexes="selectedRowIndexes"
             @rowClick="handleRowClick"/>
@@ -356,7 +355,6 @@ export default defineComponent({
       handleMouseup,
       handleBodyScroll,
       handleRowClick,
-      scrollBoundary,
       selectedRowIndexes,
     }
   }
