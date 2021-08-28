@@ -1,13 +1,13 @@
-import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide, VNode} from 'vue';
-import {last, partition, sum, sumBy, take} from "lodash-es";
-import { VirtualList } from 'vueuc';
+import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, provide, VNode} from 'vue';
+import {partition, sum, sumBy} from "lodash-es";
+import { VirtualList, VirtualListInst } from 'vueuc';
 import ATableHead from './thead.vue';
 import ATableBody from './body/tbody.vue';
 import VirtualTbody from "./body/virtualTbody.vue";
 import {WrapWithUndefined} from "../utils/types";
 import {
   CellCoordinate,
-  ColumnOptions, Coordinate,
+  ColumnOptions,
   SelectedRow,
   SelectMode,
   TableData
@@ -52,6 +52,12 @@ export default defineComponent({
   },
   setup(props, { slots }) {
     const tableRootHtml = ref<WrapWithUndefined<HTMLElement>>(undefined);
+    const virtualListRef = ref<VirtualListInst | null>(null);
+
+    onMounted(() => {
+      console.log('mounted', virtualListRef.value);
+    });
+
     const separateHeight = ref(false);
     const colTotalWidth = ref(0);
     const tableData = ref<TableData[]>([]);
