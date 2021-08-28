@@ -1,40 +1,9 @@
-<template>
-  <div class="ant-table-wrap" ref="tableRootHtml">
-    <div class="ant-tables">
-      <div class="ant-table-section sec-header" :style="hfStyle">
-        <table class="ant-table" cellSpacing="0" :style="tableStyle">
-          <colgroup>
-            <col v-for="item of cols" :width="item" />
-          </colgroup>
-          <a-table-head :columns="columns" :tableStyle="tableStyle" :scrollBoundary="scrollBoundary" />
-        </table>
-      </div>
-
-      <div class="ant-table-section sec-body" :style="bodyStyle"  @scroll="handleBodyScroll">
-        <table class="ant-table" cellSpacing="0" :style="tableStyle">
-          <colgroup>
-            <col v-for="item of cols" :width="item" />
-          </colgroup>
-          <a-table-body
-            :columns="columns"
-            :data="tableData"
-            :tableStyle="tableStyle"
-            :row-key="rowKey"
-            :scrollBoundary="scrollBoundary"
-            :select-mode="selectMode"
-            :select-indexes="selectedRowIndexes"
-            @rowClick="handleRowClick"/>
-        </table>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script lang="ts">
-import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide} from 'vue';
+import {defineComponent, ref, computed, nextTick, onMounted, PropType, watch, InjectionKey, provide, VNode} from 'vue';
 import {last, partition, sum, sumBy, take} from "lodash-es";
+import { VirtualList } from 'vueuc';
 import ATableHead from './thead.vue';
-import ATableBody from './tbody.vue';
+import ATableBody from './body/tbody.vue';
+import VirtualTbody from "./body/virtualTbody.vue";
 import {WrapWithUndefined} from "../utils/types";
 import {
   CellCoordinate,
@@ -47,6 +16,8 @@ import ScrollServe, {IsReachBoundary} from './scroll';
 import {TableRootKey} from "./injection";
 import {getClickType, getSelectedCellIndex} from "./uses";
 import {rowSelectStrategies} from "./select-row-strategies";
+import './index.scss';
+import Cell from './cell.vue';
 
 interface TableSectionEls {
   head: HTMLElement;
@@ -56,7 +27,6 @@ interface TableSectionEls {
 
 export default defineComponent({
   name: 'ATable',
-  components: { ATableHead, ATableBody },
   props: {
     columns: {
       type: Array as PropType<ColumnOptions[]>,
@@ -69,6 +39,10 @@ export default defineComponent({
     maxHeight: {
       type: Number,
       default: 0
+    },
+    virtual: {
+      type: Boolean,
+      default: false
     },
     rowKey: {
       type: String,
@@ -96,8 +70,8 @@ export default defineComponent({
 
     const bodyHeadDom = (): Partial<TableSectionEls> => {
       if (tableRootHtml.value instanceof HTMLElement) {
-        const head = <HTMLElement>tableRootHtml.value.querySelector('.sec-header') || undefined; // .table-head
-        const body = <HTMLElement>tableRootHtml.value.querySelector('.sec-body .ant-table') || undefined;
+        const head = tableRootHtml.value.querySelector('.sec-header') as WrapWithUndefined<HTMLElement>; // .table-head
+        const body = tableRootHtml.value.querySelector('.sec-body .ant-table') as WrapWithUndefined<HTMLElement>;
         return { head, body };
       }
       return {};
@@ -107,8 +81,7 @@ export default defineComponent({
       nextTick(() => {
         const { head, body } = bodyHeadDom();
         if (head && body) {
-          // console.log('head body', head, body);
-          separateHeight.value = props.maxHeight > 0 && body.clientHeight - head.clientHeight > props.maxHeight;
+          separateHeight.value = props.virtual || (props.maxHeight > 0 && body.clientHeight - head.clientHeight > props.maxHeight);
         }
       });
     }
@@ -151,6 +124,7 @@ export default defineComponent({
       }
       return {};
     });
+
     const cols = computed(() => {
       let widths = props.columns.map(item => item.width || 'auto');
       const { head, body } = bodyHeadDom();
@@ -209,8 +183,6 @@ export default defineComponent({
     }
 
     const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
-      console.log('cell click');
-      // debugger;
       if (props.selectMode !== 'cell' || moving.value) return;
       event.stopPropagation();
       const clickType = getClickType(event);
@@ -330,69 +302,99 @@ export default defineComponent({
     watch(() => props.data, () => {
       init();
     });
-    return {
-      hfStyle,
-      bodyStyle,
-      tableStyle,
-      tableRootHtml,
-      moving,
-      cols,
-      tableData,
-      handleMouseup,
-      handleBodyScroll,
-      handleRowClick,
-      scrollBoundary,
-      selectedRowIndexes,
+    const setCols = (): JSX.Element[] => {
+      return cols.value.map(item => {
+        return <col width={ item } key={ item } />;
+      });
+    }
+    const cellsOfTr = (row: TableData, index: number) => {
+      return props.columns.map((col, cIndex) => {
+        return <Cell
+          key={ col.title || cIndex }
+          columns={ props.columns }
+          tableStyle={ tableStyle.value }
+          scrollBoundary={ scrollBoundary.value }
+          data={ row }
+          colIndex={ cIndex }
+          index={ index }
+        />
+      })
+    }
+
+    const tableRowCls = (index: number): string => {
+      const selected = selectedRowIndexes.value.findIndex(item => item === index) > -1;
+      return `table-row ${ selected ? 'selected' : '' }`;
+    };
+
+    const dataOfTr = () => {
+      return tableData.value.map((row, index) => {
+        // @ts-ignore
+        return <tr class={ tableRowCls(index) } key={ row[props.rowKey] } onClick={
+          (event: MouseEvent) => {
+            const clickType = getClickType(event);
+            handleRowClick({ clickType, index });
+          }
+        }>
+          { cellsOfTr(row, index) }
+        </tr>
+      })
+    }
+
+    const virtualBody = (): JSX.Element => {
+      return <VirtualList
+        class="ant-table-section sec-body"
+        ref="virtualListRef"
+        style={ bodyStyle.value }
+        items={ dataOfTr() }
+        itemSize={54}
+        visibleItemsTag={ VirtualTbody }
+        visibleItemsProps={{
+          tableStyle: tableStyle.value,
+          cols: cols.value
+        }}
+        onScroll={ handleBodyScroll }>
+        {{
+          default: ({ item }: { item: VNode }) => {
+            return item
+          }
+        }}
+      </VirtualList>
+    }
+
+    const normalBody = (): JSX.Element => {
+      // @ts-ignore
+      return <div class="ant-table-section sec-body" style={ bodyStyle.value }  onScroll={ handleBodyScroll }>
+        <table class="ant-table" cellspacing="0" style={ tableStyle.value }>
+          <colgroup>
+            { setCols() }
+          </colgroup>
+          <ATableBody
+            columns={ props.columns }
+            rowKey={ props.rowKey }
+            selectMode={ props.selectMode }
+            data={ tableData.value }
+            tableStyle={ tableStyle.value }
+            scrollBoundary={ scrollBoundary.value }
+            selectIndexes={ selectedRowIndexes.value }
+            onRowClick={ handleRowClick } />
+        </table>
+      </div>;
+    }
+
+    return () => {
+      return <div class="ant-table-wrap" ref={ tableRootHtml }>
+        <div class="ant-tables">
+          <div class="ant-table-section sec-header" style={ hfStyle.value }>
+            <table class="ant-table" cellspacing="0" style={ tableStyle.value }>
+              <colgroup>
+                { setCols() }
+              </colgroup>
+              <ATableHead columns={ props.columns } tableStyle={ tableStyle.value } scrollBoundary={ scrollBoundary.value } />
+            </table>
+          </div>
+          { props.virtual ? virtualBody() : normalBody() }
+        </div>
+      </div>
     }
   }
 });
-</script>
-<style lang="scss">
-  .#{$ant-pre}table-wrap {
-    background-color: $white-color;
-    .#{$ant-pre}tables {
-      overflow-x: auto;
-      border: {
-        left: 1px solid $border-color;
-        top: 1px solid $border-color;
-      }
-      .#{$ant-pre}table-section {
-        position: relative;
-        &.sec-header::-webkit-scrollbar, &.sec-footer::-webkit-scrollbar {
-          background-color: transparent;
-          border-right: 1px solid $border-color;
-        }
-        .#{$ant-pre}table {
-          width: 100%;
-          min-width: 100%;
-          table-layout: fixed;
-          .table-row {
-            transition: background-color .2s ease-in-out;
-            &:hover {
-              background-color: $bg-prev-color;
-            }
-            .table-cell {
-              padding: 2px 18px;
-              height: 48px;
-              border: {
-                bottom: 1px solid $border-color;
-                right: 1px solid $border-color;
-              }
-              transition: background-color .2s ease-in-out;
-            }
-            .table-cell.selected {
-              background-color: $assist-color;
-            }
-            .table-cell.is-start {
-              background-color: unset;
-              border: 1px solid $assist-color;
-            }
-          }
-          .table-row.selected {
-            background-color: $assist-color;
-          }
-        }
-      }
-    }
-  }
-</style>

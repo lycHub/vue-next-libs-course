@@ -16,10 +16,10 @@
 
 <script lang="tsx">
   import {defineComponent, PropType} from 'vue';
-  import {CellStyle, SelectMode, TableData} from "./types";
-  import {commonProps, getCellStyle, getClickType} from "./uses";
-  import {WrapWithUndefined} from "../utils/types";
-  import Cell from './cell.vue';
+  import {CellStyle, ClickType, SelectMode, TableData} from "../types";
+  import {commonProps, getCellStyle, getClickType} from "../uses";
+  import {CustomEventFuncType, WrapWithUndefined} from "../../utils/types";
+  import Cell from '../cell.vue';
 
   export default defineComponent({
     name: 'ATableBody',
@@ -39,6 +39,7 @@
         type: Array as PropType<number[]>,
         default: () => []
       },
+      onRowClick: Function as PropType<(arg: { index: number; clickType: ClickType }) => void>
     },
     emits: ['rowClick'],
     setup(props, { emit }) {

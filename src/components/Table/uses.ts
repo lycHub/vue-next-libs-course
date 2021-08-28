@@ -1,4 +1,4 @@
-import {computed, PropType} from "vue";
+import {PropType} from "vue";
 import {
   CellCoordinate,
   CellStyle,
@@ -11,7 +11,6 @@ import {
 } from "./types";
 import {findIndex, findLastIndex, orderBy, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
-import {WrapWithUndefined} from "../utils/types";
 
 const commonProps = {
   columns: {
