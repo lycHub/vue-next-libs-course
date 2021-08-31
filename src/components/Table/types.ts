@@ -3,6 +3,7 @@ import { PositionProperty } from 'csstype';
 
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
+type ScrollPosition = 'left' | 'middle' | 'right';
 type TableData = Record<string, any>;
 type Coordinate = { x: number; y: number; };
 type CellCoordinate = Coordinate & Partial<{ isStart: boolean; isEnd: boolean; inRange: boolean; }>;
@@ -38,6 +39,11 @@ interface ColStyle extends CSSProperties {
   boxShadow: string;
 }
 
+interface ColStyleWithCls extends CSSProperties {
+  style: Partial<ColStyle>;
+  cls: string;
+}
+
 type ClickType = 'single' | 'ctrl' | 'shift';
 
 interface SelectedRow {
@@ -45,4 +51,4 @@ interface SelectedRow {
   clickType: ClickType;
 }
 
-export { TableDataOfSelected, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { TableDataOfSelected, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

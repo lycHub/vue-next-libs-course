@@ -2,7 +2,7 @@
   <td
     ref="rootHtml"
     :class="cellCls"
-    :style="colStyle[colIndex]"
+    :style="colStyleWithCls[colIndex].style"
     @click="clickCell"
     @mousedown="mousedownCell"
     @mouseenter="mouseenterCell">
@@ -48,9 +48,6 @@ import {WrapWithUndefined} from "../utils/types";
       const column = computed(() => props.columns[props.colIndex]);
       const selected = ref(false);
       const isStart = ref(false);
-      /*watch(() => props.ColStyle, newVal => {
-        console.log('wat colStyle', newVal);
-      }, { immediate: true })*/
       watch(tableSlots.highCells, highCells => {
         // console.log('wat tableSlots.highCells', highCells);
         const targetIndex = getSelectedCellIndex(highCells, props.index, props.colIndex);
@@ -71,7 +68,7 @@ import {WrapWithUndefined} from "../utils/types";
       const rootHtml = ref<WrapWithUndefined<HTMLTableDataCellElement>>();
 
       const cellCls = computed(() => {
-        let result = 'table-cell';
+        let result = props.colStyleWithCls[props.colIndex].cls;
         if (selected.value) {
           result += ' selected';
         }

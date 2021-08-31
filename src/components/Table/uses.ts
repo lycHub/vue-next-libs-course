@@ -1,13 +1,12 @@
-import {computed, PropType} from "vue";
+import {PropType} from "vue";
 import {
   CellCoordinate,
-  ColStyle,
   ClickType,
   ColumnOptions,
   Coordinate,
   FixTypes,
   TableDataOfSelected,
-  TableStyle
+  TableStyle, ColStyleWithCls, ColStyle
 } from "./types";
 import {findIndex, findLastIndex, orderBy, sumBy} from "lodash-es";
 import {IsReachBoundary} from "./scroll";
@@ -23,8 +22,8 @@ const commonProps = {
     type: Object as PropType<TableStyle>,
     default: () => ({})
   },
-  colStyle: {
-    type: Array as PropType<Partial<ColStyle>[]>,
+  colStyleWithCls: {
+    type: Array as PropType<ColStyleWithCls[]>,
     default: () => []
   }
 }
@@ -33,32 +32,19 @@ const commonProps = {
 
 
 function getColStyle(columns: ColumnOptions[], tableStyle: TableStyle, index: number): Partial<ColStyle> {
-  console.log('getSc');
   const result: Partial<ColStyle> = {};
   const col = columns[index];
-  const setBoxShadow = (colIndex: number, fixed: FixTypes): string => { // 暂时只考虑右边
-    // const boundary = fixed === 'left' ? scrollBoundary[0] : scrollBoundary[1];
-    // const indexFunc = fixed === 'left' ? findLastIndex : findIndex;
-    const boxShadowXY = fixed === 'left' ? '2px 0 ' : '-2px 0 ';
-    // const edgeFixedIndex = indexFunc(columns, { fixed });
-
-    // console.log('colIndex firstFixedIndex', colIndex, edgeFixedIndex);
-    return boxShadowXY +'6px -2px rgb(0 0 0 / 20%)';
-  }
-
-  if (tableStyle.width) {
+  if (tableStyle.width && col.fixed) {
     if (col.fixed === 'right') {
       const sArr = columns.slice(index + 1);
       // console.log('sArr', sArr);
       result.position = 'sticky';
       result.right = sumBy(sArr, 'width') + 'px';
-      result.boxShadow = setBoxShadow(index, col.fixed);
     } else if (col.fixed === 'left') {
       const sArr = columns.slice(0, index);
       // console.log('sArr', sArr);
       result.position = 'sticky';
       result.left = sumBy(sArr, 'width') + 'px';
-      result.boxShadow = setBoxShadow(index, col.fixed);
     }
   }
   return result;

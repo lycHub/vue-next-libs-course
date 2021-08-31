@@ -1,13 +1,12 @@
 <template>
-  <div class="ant-table-wrap" ref="tableRootHtml">
-<!--    <p>ColStyle: {{ ColStyle }}</p>-->
+  <div :class="rootCls" ref="tableRootHtml">
     <div class="ant-tables">
       <div class="ant-table-section sec-header" :style="hfStyle">
         <table class="ant-table" cellSpacing="0" :style="tableStyle">
           <colgroup>
             <col v-for="item of cols" :width="item" />
           </colgroup>
-          <a-table-head :columns="columns" :tableStyle="tableStyle" :colStyle="colStyle" />
+          <a-table-head :columns="columns" :tableStyle="tableStyle" :colStyleWithCls="colStyleWithCls" />
         </table>
       </div>
 
@@ -20,7 +19,7 @@
             :columns="columns"
             :data="tableData"
             :tableStyle="tableStyle"
-            :colStyle="colStyle"
+            :colStyleWithCls="colStyleWithCls"
             :row-key="rowKey"
             :select-mode="selectMode"
             :select-indexes="selectedRowIndexes"
@@ -33,12 +32,12 @@
 
 <script lang="ts">
 import {defineComponent, ref, computed, nextTick, PropType, watch, provide} from 'vue';
-import {partition, sum, sumBy} from "lodash-es";
+import {findIndex, findLastIndex, partition, sum, sumBy} from "lodash-es";
 import ATableHead from './thead.vue';
 import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
 import {
-  CellCoordinate, ColStyle,
+  CellCoordinate, ColStyleWithCls,
   ColumnOptions, Coordinate,
   SelectedRow,
   SelectMode,
@@ -54,6 +53,9 @@ interface TableSectionEls {
   body: HTMLElement;
   foot: HTMLElement;
 }
+
+const baseCls = 'ant-table-wrap';
+const scrollBaseCls = 'scroll-position-';
 
 export default defineComponent({
   name: 'ATable',
@@ -183,18 +185,33 @@ export default defineComponent({
       return props.columns.map((item, index) => widths[index]);
     });
 
+    const rootCls = ref(`${baseCls} ${scrollBaseCls + 'left'}`);
     const updateScrollBoundary = (state: IsReachBoundary) => {
       for (let a = 0; a < state.length; a++) {
         if (state[a] !== scrollBoundary.value[a]) {
           scrollBoundary.value = state;
+          const boundary = state[0] ? 'left' : state[1] ? 'right' : 'middle';
+          rootCls.value = `${baseCls} ${scrollBaseCls + boundary}`;
           break;
         }
       }
     }
 
-    const colStyle = computed<Partial<ColStyle>[]>(() => {
+    const colStyleWithCls = computed<Partial<ColStyleWithCls>[]>(() => {
+      const base = 'table-cell';
+      const leftEdgeFixedIndex = findLastIndex(props.columns, { fixed: 'left' });
+      const rightEdgeFixedIndex = findIndex(props.columns, { fixed: 'right' });
       return props.columns.map((col, index) => {
-        return col.fixed ? getColStyle(props.columns, tableStyle.value, index) : {}
+        let style = {};
+        let cls = base;
+        if (col.fixed) {
+          style = getColStyle(props.columns, tableStyle.value, index);
+          cls += ' fixed';
+          if (index === leftEdgeFixedIndex || index === rightEdgeFixedIndex) {
+            cls += ' fixed-' + col.fixed
+          }
+        }
+        return { style, cls };
       });
     });
     const handleBodyScroll = (event: Event) => {
@@ -202,8 +219,8 @@ export default defineComponent({
       const direction = ScrollServe.getDirection(target);
       if (direction === 'horizontal') {
         const { head } = bodyHeadDom();
+        updateScrollBoundary(ScrollServe.hasReachBoundary(target, direction));
         if (head) {
-          // updateScrollBoundary(ScrollServe.hasReachBoundary(target, 'horizontal'))
           ScrollServe.setScroll(head, target.scrollLeft, false);
         }
         // ScrollServe.setScroll(this.$refs.tableFooter, target.scrollLeft, false);
@@ -317,8 +334,6 @@ export default defineComponent({
 
     const handleCellMousedown = (coordinate: CellCoordinate) => {
       moving.value = true;
-      // selectedCellCoordinates.value = [];
-      // selectedCellCoordinatesInRange.value = [];
       mousedownStartCoordinate.value = coordinate;
       addEventListener('mouseup', handleMouseup);
     }
@@ -344,7 +359,8 @@ export default defineComponent({
       init();
     });
     return {
-      colStyle,
+      rootCls,
+      colStyleWithCls,
       hfStyle,
       bodyStyle,
       tableStyle,
@@ -394,6 +410,16 @@ export default defineComponent({
               background-color: inherit;
               transition: background-color .2s ease-in-out;
             }
+            .table-cell.fixed {
+              position: sticky;
+              transition: box-shadow .2s ease-in-out;
+              &.fixed-left {
+                box-shadow: 2px 0 6px -2px rgba(0,0,0,.2);
+              }
+              &.fixed-right {
+                box-shadow: -2px 0 6px -2px rgba(0,0,0,.2);
+              }
+            }
             .table-cell.selected {
               background-color: $assist-color;
             }
@@ -407,6 +433,15 @@ export default defineComponent({
           }
         }
       }
+    }
+  }
+
+  .#{$ant-pre}table-wrap {
+    &.scroll-position-left .table-cell.fixed-left {
+      box-shadow: none!important;
+    }
+    &.scroll-position-right .table-cell.fixed-right {
+      box-shadow: none!important;
     }
   }
 </style>

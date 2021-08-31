@@ -6,7 +6,7 @@
       :key="col.title || cIndex"
       :columns="columns"
       :table-style="tableStyle"
-      :col-style="colStyle"
+      :col-style-with-cls="colStyleWithCls"
       :data="row"
       :col-index="cIndex"
       :index="index" />
