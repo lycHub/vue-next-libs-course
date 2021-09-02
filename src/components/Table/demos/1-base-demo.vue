@@ -2,7 +2,7 @@
   <div class="demo-box">
 <!--    <p>类型问题：全局组件的属性没提示</p>-->
     <button @click="changeTableData">change table data</button>
-    <a-table :columns="columns" :data="data" :max-height="300">
+    <a-table :columns="columns" :data="data" :max-height="300" select-mode="row">
       <template v-slot:age="{ data }">
         <b>{{ data.age }}岁</b>
       </template>
@@ -17,9 +17,9 @@ import {genTableData} from "./mock";
   export default defineComponent({
     name: "TableDemo",
     setup() {
-      const data = ref<TableData[]>(genTableData(3));
+      const data = ref<TableData[]>(genTableData());
       const changeTableData = () => {
-        data.value = genTableData(10);
+        data.value = genTableData(40);
       }
       const look = (data: string) => {
         console.log('look', data);

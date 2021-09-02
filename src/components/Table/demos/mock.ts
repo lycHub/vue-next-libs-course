@@ -1,6 +1,6 @@
 import {TableData} from "../types";
 
-export function genTableData(count = 3): TableData[] {
+export function genTableData(count = 10): TableData[] {
   return Array(count).fill('').map((item, index) => ({
     id: index,
     name: '张三' + index,

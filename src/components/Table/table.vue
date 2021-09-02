@@ -412,7 +412,7 @@ export default defineComponent({
             }
             .table-cell.fixed {
               position: sticky;
-              transition: box-shadow .2s ease-in-out;
+              transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out;
               &.fixed-left {
                 box-shadow: 2px 0 6px -2px rgba(0,0,0,.2);
               }
