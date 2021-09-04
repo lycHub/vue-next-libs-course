@@ -1,13 +1,34 @@
 <template>
   <div class="ant-table-wrap">
-    table
+    <div class="ant-tables">
+      <div class="ant-table-section sec-header">
+        <table class="ant-table" cellspacing="0">
+         <!-- <colgroup>
+            <col width="300" />
+            <col width="100" />
+            <col width="300" />
+          </colgroup>-->
+          <a-thead :columns="columns" />
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
-<script>
-  export default {
-    name: "ATable"
-  }
+<script lang="ts">
+  import { defineComponent, PropType } from 'vue';
+  import { ColumnOptions } from './types';
+  import AThead from './thead.vue';
+  export default defineComponent({
+    name: "ATable",
+    components: { AThead },
+    props: {
+      columns: {
+        type: Array as PropType<ColumnOptions[]>,
+        default: () => []
+      },
+    }
+  });
 </script>
 
 <style lang="scss">

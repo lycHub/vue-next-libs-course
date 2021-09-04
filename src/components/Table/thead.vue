@@ -1,0 +1,32 @@
+<template>
+  <thead class="table-head">
+  <tr class="table-row">
+<!--  index  -->
+    <th class="table-cell" v-for="col of columns" :key="tableRowKey(col)">
+      <span class="cell-text">{{ col.title }}</span>
+    </th>
+  </tr>
+  </thead>
+</template>
+
+<script lang="ts">
+  import {defineComponent, PropType} from "vue";
+  import {ColumnOptions} from "./types";
+  import {tableRowKey} from "./helper";
+
+  export default defineComponent({
+    name: "AThead",
+    props: {
+      columns: {
+        type: Array as PropType<ColumnOptions[]>,
+        default: () => []
+      },
+    },
+    setup() {
+      return {
+        tableRowKey
+      }
+    }
+  });
+</script>
+
