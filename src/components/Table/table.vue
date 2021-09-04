@@ -4,7 +4,7 @@
       <div class="ant-table-section sec-header" :style="hfStyle">
         <table class="ant-table" cellSpacing="0" :style="tableStyle">
           <colgroup>
-            <col v-for="item of cols" :width="item" />
+            <col v-for="(item, index) of columns" :width="item.width" :key="item.key || item.title || index" />
           </colgroup>
           <a-table-head :columns="columns" :tableStyle="tableStyle" :colStyleWithCls="colStyleWithCls" />
         </table>
@@ -13,7 +13,7 @@
       <div class="ant-table-section sec-body" :style="bodyStyle"  @scroll="handleBodyScroll">
         <table class="ant-table" cellspacing="0" :style="tableStyle">
           <colgroup>
-            <col v-for="item of cols" :width="item" />
+            <col v-for="(item, index) of columns" :width="item.width" :key="item.key || item.title || index" />
           </colgroup>
           <a-table-body
             :columns="columns"
@@ -31,17 +31,18 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, computed, nextTick, PropType, watch, provide} from 'vue';
+import {defineComponent, ref, computed, nextTick, PropType, watch, provide, onMounted, CSSProperties} from 'vue';
 import {findIndex, findLastIndex, partition, sum, sumBy} from "lodash-es";
 import ATableHead from './thead.vue';
 import ATableBody from './tbody.vue';
 import {WrapWithUndefined} from "../utils/types";
 import {
   CellCoordinate, ColStyleWithCls,
-  ColumnOptions, Coordinate,
+  ColumnOptions, ColWidth,
   SelectedRow,
   SelectMode,
-  TableData
+  TableData,
+UserSelectProperty
 } from "./types";
 import ScrollServe, {IsReachBoundary} from './scroll';
 import {TableRootKey} from "./injection";
@@ -116,6 +117,34 @@ export default defineComponent({
       });
     }
 
+    const setColumnsWidth = () => {
+      const { head, body } = bodyHeadDom();
+      // console.log('render head body', head, body);
+      if (head && body) {
+        // debugger;
+        const trueWidth = body.clientWidth;
+        const [hasWidthColumns, noWidthColumns] = partition(props.columns, 'width');
+        const colCountWidth = sumBy(hasWidthColumns, 'width');
+        const restWidth = trueWidth - colCountWidth;
+        const restAverageWidth = restWidth / (noWidthColumns.length || 1);
+        // console.log('restWidth :>> ', restWidth);
+        props.columns.forEach(item => {
+            let width: ColWidth = item.width || 'auto';
+            if (typeof item.width !== 'number') {
+              width = restAverageWidth;
+              if (item.minWidth) {
+                width = Math.max(item.minWidth, width);
+              }
+              if (item.maxWidth) {
+                width = Math.min(item.maxWidth, width);
+              }
+            }
+            item.width = width;
+          });
+      }
+      colTotalWidth.value = sumBy(props.columns, 'width');
+    }
+
 
     const hfStyle = computed(() => { // 这里本是方法
       const result = { overflow: 'hidden ' };
@@ -126,11 +155,11 @@ export default defineComponent({
     });
 
     const moving = ref(false);
-    const bodyStyle = computed(() => { // 这里本是方法
+    const bodyStyle = computed<CSSProperties>(() => {
       const result: {
         overflow: string;
         cursor: string;
-        userSelect: string;
+        userSelect: UserSelectProperty;
         maxHeight?: string;
       } = { overflow: 'auto', cursor: 'auto', userSelect: 'auto' };
       if (separateHeight.value) {
@@ -153,36 +182,6 @@ export default defineComponent({
         }
       }
       return {};
-    });
-    const cols = computed(() => {
-      let widths = props.columns.map(item => item.width || 'auto');
-      const { head, body } = bodyHeadDom();
-      // console.log('render head body', head, body);
-      if (head && body) {
-        const trueWidth = body.clientWidth;
-        const [hasWidthColumns, noWidthColumns] = partition(props.columns, 'width');
-        const colCountWidth = sumBy(hasWidthColumns, 'width');
-        const restWidth = trueWidth - colCountWidth;
-        const restAverageWidth = restWidth / (noWidthColumns.length || 1);
-        if (restWidth > 0) {
-          widths = props.columns.map(item => {
-            let width: number | 'auto' = item.width || 'auto';
-            if (width === 'auto') {
-              // width = Math.min(Math.max((item.minWidth || 0), restAverageWidth), item.maxWidth || 0)
-              width = restAverageWidth;
-              if (item.minWidth) {
-                width = Math.max(item.minWidth, width);
-              }
-              if (item.maxWidth) {
-                width = Math.min(item.maxWidth, width);
-              }
-            }
-            return width;
-          });
-        }
-      }
-      colTotalWidth.value = sum(widths.filter(item => typeof item === 'number'));
-      return props.columns.map((item, index) => widths[index]);
     });
 
     const rootCls = ref(`${baseCls} ${scrollBaseCls + 'left'}`);
@@ -352,10 +351,14 @@ export default defineComponent({
     const init = () => {
       tableData.value = props.data || [];
       selectedRowIndexes.value = [];
+      setColumnsWidth();
       setSeparateHeight();
     }
-    init();
-    watch(() => props.data, () => {
+    onMounted(() => {
+      init();
+    });
+    
+    watch([() => props.data, () => props.columns], () => {
       init();
     });
     return {
@@ -366,7 +369,6 @@ export default defineComponent({
       tableStyle,
       tableRootHtml,
       moving,
-      cols,
       tableData,
       handleMouseup,
       handleBodyScroll,

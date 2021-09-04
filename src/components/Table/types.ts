@@ -1,6 +1,10 @@
 import { CSSProperties } from '@vue/runtime-dom';
 import { PositionProperty } from 'csstype';
 
+export type UserSelectProperty = "-moz-none" | "all" | "auto" | "contain" | "element" | "none" | "text";
+
+
+type ColWidth = number | 'auto';
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
 type ScrollPosition = 'left' | 'middle' | 'right';
@@ -21,7 +25,7 @@ interface ColumnOptions {
   key: string;
   slot: string;
   fixed: FixTypes;
-  width: number;
+  width: ColWidth;
   minWidth: number;
   maxWidth: number;
   renderHeader: TableRenderFunc;
@@ -51,4 +55,4 @@ interface SelectedRow {
   clickType: ClickType;
 }
 
-export { TableDataOfSelected, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { TableDataOfSelected, ColWidth, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

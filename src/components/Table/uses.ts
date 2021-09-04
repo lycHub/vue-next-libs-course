@@ -23,7 +23,7 @@ const commonProps = {
     default: () => ({})
   },
   colStyleWithCls: {
-    type: Array as PropType<ColStyleWithCls[]>,
+    type: Array as PropType<Partial<ColStyleWithCls>[]>,
     default: () => []
   }
 }

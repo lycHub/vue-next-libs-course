@@ -63,7 +63,7 @@ import {genTableData} from "./mock";
           },
           {
             title: 'Action',
-            width: 120,
+            minWidth: 100,
             fixed: 'right',
             render: ({ data }: TableRenderFuncParams) => {
               // console.log('data', data);

@@ -3,7 +3,7 @@
     <div class="app-container">
       <basic-demo />
       <br />
-      <table-demo />
+      <!-- <table-demo /> -->
     </div>
   </div>
 </template>
