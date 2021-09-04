@@ -52,7 +52,7 @@ function getColStyle(columns: ColumnOptions[], tableStyle: TableStyle, index: nu
 
 
 function getClickType(event: MouseEvent): ClickType {
-  return event.shiftKey ? 'shift' : event.ctrlKey ? 'ctrl' : 'single';
+  return event.shiftKey ? 'shift' : (event.ctrlKey || event.metaKey) ? 'ctrl' : 'single';
 }
 
 function getSelectedCellIndex(selectedCells: TableDataOfSelected[], x: number, y: number): number {

@@ -49,7 +49,6 @@
       };
       const clickRow = (event: MouseEvent, index: number) => {
         const clickType = getClickType(event);
-        // console.log('index', index, clickType);
         emit('rowClick', { index, clickType });
       }
       return { clickRow, tableRowCls };
