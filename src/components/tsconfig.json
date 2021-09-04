@@ -5,5 +5,5 @@
     "emitDeclarationOnly": true,
     "declarationDir": "../../lib/typings"
   },
-  "include": ["."]
+  "include": [".", "../shims-vue.d.ts"]
 }

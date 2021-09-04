@@ -5,6 +5,7 @@ import FormItem from './FormItem';
 import Tabs from './Tabs';
 import TabPane from './TabPane';
 import Tree from './Tree';
+import Table from './Table';
 
 
 const components = [
@@ -13,7 +14,8 @@ const components = [
   Form,
   Tabs,
   TabPane,
-  Tree
+  Tree,
+  Table
 ]
 
 export {

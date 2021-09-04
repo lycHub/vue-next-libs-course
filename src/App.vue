@@ -1,18 +1,18 @@
 <template>
   <div class="app">
     <div class="app-container">
-      <tree-demo />
+      <table-demo />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import TreeDemo from './components/Tree/demo.vue';
+import TableDemo from './components/Table/demo.vue';
 export default defineComponent({
   name: 'App',
   components: {
-    TreeDemo
+    TableDemo
   }
 });
 </script>

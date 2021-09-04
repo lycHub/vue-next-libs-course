@@ -1,0 +1,82 @@
+<template>
+  <div class="ant-table-wrap">
+    table
+  </div>
+</template>
+
+<script>
+  export default {
+    name: "ATable"
+  }
+</script>
+
+<style lang="scss">
+  .#{$ant-pre}table-wrap {
+    .#{$ant-pre}tables {
+      overflow-x: auto;
+      border: {
+        left: 1px solid $border-color;
+        top: 1px solid $border-color;
+      }
+      .#{$ant-pre}table-section {
+        position: relative;
+        &.sec-header::-webkit-scrollbar, &.sec-footer::-webkit-scrollbar {
+          background-color: transparent;
+          border-right: 1px solid $border-color;
+        }
+        .#{$ant-pre}table {
+          width: 100%;
+          min-width: 100%;
+          table-layout: fixed;
+          .table-row {
+            background-color: $white-color;
+            transition: background-color .2s ease-in-out;
+            &:hover {
+              background-color: $bg-prev-color;
+            }
+            .table-cell {
+              padding: 2px 18px;
+              height: 48px;
+              border: {
+                bottom: 1px solid $border-color;
+                right: 1px solid $border-color;
+              }
+              background-color: inherit;
+              transition: background-color .2s ease-in-out;
+            }
+            .table-cell.fixed {
+              position: sticky;
+              transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out;
+              &.fixed-left {
+                box-shadow: 2px 0 6px -2px rgba(0,0,0,.2);
+              }
+              &.fixed-right {
+                box-shadow: -2px 0 6px -2px rgba(0,0,0,.2);
+              }
+            }
+            .table-cell.selected {
+              background-color: $assist-color;
+            }
+            .table-cell.is-start {
+              background-color: unset;
+              border: 1px solid $assist-color;
+            }
+          }
+          .table-row.selected {
+            background-color: $assist-color;
+          }
+        }
+      }
+    }
+  }
+  
+  .#{$ant-pre}table-wrap {
+    &.scroll-position-left .table-cell.fixed-left {
+      box-shadow: none!important;
+    }
+    &.scroll-position-right .table-cell.fixed-right {
+      box-shadow: none!important;
+    }
+  }
+</style>
+
