@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import TableDemo from './components/Table/demo.vue';
+import TableDemo from './components/Table/demo/demo.vue';
 export default defineComponent({
   name: 'App',
   components: {
@@ -18,7 +18,7 @@ export default defineComponent({
 </script>
 <style lang="scss">
   .app-container {
-    width: 1000px;
+    width: 800px;
     margin: 0 auto;
   }
 </style>

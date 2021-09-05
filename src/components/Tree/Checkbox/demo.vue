@@ -1,6 +1,5 @@
 <template>
   <div class="demo-box">
-    <button @click="reset">reset</button>
     <div class="form-item" style="width: 206px;">
       value: {{ value }}
       <a-checkbox v-model="value" />

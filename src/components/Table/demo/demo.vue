@@ -1,15 +1,23 @@
 <template>
   <div class="demo-box">
-    <a-table :columns="columns" />
+    <a-table :columns="columns" :data="data" row-key="id" />
   </div>
 </template>
 
-<script lang="tsx">
-  import {defineComponent, ref} from 'vue';
+<script lang="ts">
+  import {defineComponent, onMounted, ref} from 'vue';
+  import { TableData } from '';
+  import { genTableData } from './mock';
+
   export default defineComponent({
     name: "TableDemo",
     setup() {
+      const data = ref<TableData[]>([]);
+      onMounted(() => {
+        data.value = genTableData();
+      });
       return {
+        data,
         columns: [
           {
             title: 'Name',
@@ -19,6 +27,7 @@
           },
           {
             title: 'Age',
+            key: 'age',
             slot: 'age',
             width: 200,
             fixed: 'left'
@@ -41,6 +50,12 @@
           {
             title: 'Postcode',
             key: 'zip',
+            width: 200,
+            fixed: 'right',
+          },
+          {
+            title: 'Action',
+            key: 'action',
             width: 200,
             fixed: 'right',
           }

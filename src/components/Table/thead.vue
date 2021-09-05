@@ -1,8 +1,7 @@
 <template>
   <thead class="table-head">
   <tr class="table-row">
-<!--  index  -->
-    <th class="table-cell" v-for="col of columns" :key="tableRowKey(col)">
+    <th class="table-cell" v-for="(col, index) of columns" :key="tableRowKey(col, index)">
       <span class="cell-text">{{ col.title }}</span>
     </th>
   </tr>
@@ -10,7 +9,7 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, PropType} from "vue";
+  import {defineComponent, PropType, ref} from "vue";
   import {ColumnOptions} from "./types";
   import {tableRowKey} from "./helper";
 

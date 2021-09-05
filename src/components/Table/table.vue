@@ -11,22 +11,59 @@
           <a-thead :columns="columns" />
         </table>
       </div>
+
+
+       <div class="ant-table-section sec-body">
+        <table class="ant-table" cellspacing="0">
+         <!-- <colgroup>
+            <col width="300" />
+            <col width="100" />
+            <col width="300" />
+          </colgroup>-->
+          <a-tbody :columns="columns" :data="tableData" :row-key="rowKey" />
+        </table>
+      </div>
+      
     </div>
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
-  import { ColumnOptions } from './types';
+  import { defineComponent, onMounted, PropType, ref, watch } from 'vue';
+  import { ColumnOptions, TableData } from './types';
   import AThead from './thead.vue';
+  import ATbody from './tbody.vue';
   export default defineComponent({
     name: "ATable",
-    components: { AThead },
+    components: { AThead, ATbody },
     props: {
       columns: {
         type: Array as PropType<ColumnOptions[]>,
         default: () => []
       },
+      data: {
+        type: Array as PropType<TableData[]>,
+        default: () => []
+      },
+      rowKey: {
+        type: String,
+        required: true
+      },
+    },
+    setup(props) {
+      const tableData = ref<TableData[]>([]);
+      const init = () => {
+        tableData.value = props.data;
+      }
+      onMounted(() => {
+        init();
+      });
+      watch(() => props.data, () => {
+        init();
+      });
+      return {
+        tableData
+      }
     }
   });
 </script>
