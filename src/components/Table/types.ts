@@ -1,6 +1,7 @@
 import { CSSProperties } from '@vue/runtime-dom';
 import { PositionProperty } from 'csstype';
 
+type ScrollDirection = 'horizontal' | 'vertical';
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
 type ScrollPosition = 'left' | 'middle' | 'right';
@@ -57,4 +58,4 @@ interface TableSectionEls {
   foot: HTMLElement;
 }
 
-export { TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { ScrollDirection, TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

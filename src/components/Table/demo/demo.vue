@@ -1,5 +1,5 @@
 <template>
-  <div class="demo-box">
+  <div class="demo-box" style="margin-top: 100px;">
     <a-table :columns="columns" :data="data" row-key="id" :max-height="300" />
   </div>
 </template>
@@ -29,7 +29,7 @@
             title: 'Age',
             key: 'age',
             slot: 'age',
-            width: 200,
+            width: 100,
             fixed: 'left'
           },
           {
@@ -45,7 +45,7 @@
           {
             title: 'Address',
             key: 'address',
-            width: 200
+            minWidth: 180
           },
           {
             title: 'Postcode',

@@ -1,20 +1,21 @@
 <template>
   <div class="ant-table-wrap" ref="tableRootHtml">
     <div class="ant-tables">
-      <div class="ant-table-section sec-header" :style="hfStyle" v-if="separateHeight">
-        <table class="ant-table" cellspacing="0">
+      <div class="ant-table-section sec-head" :style="hfStyle" v-if="separateHeight">
+        <table class="ant-table" cellspacing="0" :style="{ width: tableWidth + 'px' }">
+          <colgroup>
+            <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
+          </colgroup>
           <a-thead :columns="columns" />
         </table>
       </div>
 
 
-      <div class="ant-table-section sec-body" :style="bodyStyle">
-        <table class="ant-table" cellspacing="0">
-         <!-- <colgroup>
-            <col width="300" />
-            <col width="100" />
-            <col width="300" />
-          </colgroup>-->
+      <div class="ant-table-section sec-body" :style="bodyStyle" @scroll="handleBodyScroll">
+        <table class="ant-table" cellspacing="0" :style="{ width: tableWidth + 'px' }">
+         <colgroup>
+            <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
+          </colgroup>
           <a-thead :columns="columns" v-if="!separateHeight" />
           <a-tbody :columns="columns" :data="tableData" :row-key="rowKey" />
         </table>
@@ -29,6 +30,10 @@
   import { ColumnOptions, TableData, TableSectionEls } from './types';
   import AThead from './thead.vue';
   import ATbody from './tbody.vue';
+  import { partition, sumBy } from 'lodash';
+  import { tableRowKey } from './helper';
+  import ScrollServe, {IsReachBoundary} from './scroll';
+
   export default defineComponent({
     name: "ATable",
     components: { AThead, ATbody },
@@ -54,6 +59,7 @@
       const tableData = ref<TableData[]>([]);
       const tableRootHtml = ref<HTMLElement | undefined>();
       const separateHeight = ref(false);
+      const tableWidth = ref(0);
 
       const bodyHeadDom = (): Partial<TableSectionEls> => {
         if (tableRootHtml.value instanceof HTMLElement) {
@@ -65,14 +71,49 @@
       }
 
       const setSeparateHeight = () => {
-        nextTick(() => {
-          const { head, body } = bodyHeadDom();
+        const { head, body } = bodyHeadDom();
           if (head && body) {
             // 可能需要再减去横向滚动条的高度
             separateHeight.value = props.maxHeight > 0 && body.clientHeight - head.clientHeight > props.maxHeight;
             console.log('separateHeight', separateHeight.value);
           }
-        });
+      }
+
+      // 设置每一列的宽度，计算table总宽度
+      const setColumnsWidth = () => {
+        const { head, body } = bodyHeadDom();
+        if (head && body) {
+          const containerWidth = body.clientWidth;
+          const [hasWidthColumns, noWidthColumns] = partition(props.columns, 'width');
+          const colCountWidth = sumBy(hasWidthColumns, 'width');
+          const restWidth = Math.max(0, containerWidth - colCountWidth);
+          const restAverageWidth = restWidth / (noWidthColumns.length || 1);
+          props.columns.forEach(col => {
+            let width = col.width || 0;
+            if (typeof col.width !== 'number') {
+              width = restAverageWidth;
+              if (col.minWidth) {
+                width = Math.max(col.minWidth, width);
+              }
+              if (col.maxWidth) {
+                width = Math.min(col.maxWidth, width);
+              }
+            }
+            col.width = width;
+          });
+          tableWidth.value = sumBy(props.columns, 'width');
+        }
+      }
+
+      const handleBodyScroll = (event: Event) => {
+        const target = event.target as HTMLElement;
+        const direction = ScrollServe.getDirection(target);
+        if (direction === 'horizontal') {
+          const headSec = tableRootHtml.value?.querySelector('.sec-head') as HTMLElement;
+          if (headSec) {
+            ScrollServe.setScroll(headSec, target.scrollLeft, false);
+          }
+        }
       }
 
       const hfStyle = computed(() => {
@@ -96,9 +137,11 @@
       });
 
 
-      const init = () => {
+      const init = async () => {
         tableData.value = props.data;
+        await nextTick();
         setSeparateHeight();
+        setColumnsWidth();
       }
       onMounted(() => {
         init();
@@ -111,7 +154,10 @@
         bodyStyle,
         hfStyle,
         separateHeight,
-        tableRootHtml
+        tableWidth,
+        tableRootHtml,
+        tableRowKey,
+        handleBodyScroll,
       }
     }
   });
@@ -127,7 +173,7 @@
       }
       .#{$ant-pre}table-section {
         position: relative;
-        &.sec-header::-webkit-scrollbar, &.sec-footer::-webkit-scrollbar {
+        &.sec-head::-webkit-scrollbar, &.sec-foot::-webkit-scrollbar {
           background-color: transparent;
           border-right: 1px solid $border-color;
         }
