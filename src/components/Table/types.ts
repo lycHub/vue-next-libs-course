@@ -51,4 +51,10 @@ interface SelectedRow {
   clickType: ClickType;
 }
 
-export { TableDataOfSelected, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+interface TableSectionEls {
+  head: HTMLElement;
+  body: HTMLElement;
+  foot: HTMLElement;
+}
+
+export { TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

@@ -1,12 +1,12 @@
 <template>
   <div class="demo-box">
-    <a-table :columns="columns" :data="data" row-key="id" />
+    <a-table :columns="columns" :data="data" row-key="id" :max-height="300" />
   </div>
 </template>
 
 <script lang="ts">
   import {defineComponent, onMounted, ref} from 'vue';
-  import { TableData } from '';
+  import { TableData } from '../types';
   import { genTableData } from './mock';
 
   export default defineComponent({
