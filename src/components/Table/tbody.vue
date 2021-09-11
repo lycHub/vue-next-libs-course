@@ -1,7 +1,11 @@
 <template>
   <tbody class="table-body" align="center">
   <tr class="table-row" v-for="(row, index) of data" :key="row[rowKey]">
-    <td class="table-cell" v-for="(col, cIndex) of columns" :key="tableRowKey(col, cIndex)">
+    <td
+    :class="colStyleWidthCls[cIndex].cls"
+     v-for="(col, cIndex) of columns"
+     :key="tableRowKey(col, cIndex)"
+     :style="colStyleWidthCls[cIndex].style">
       <span class="cell-text">{{ row[col['key']] }}</span>
     </td>
   </tr>
@@ -10,7 +14,7 @@
 
 <script lang="ts">
   import {defineComponent, PropType, ref} from "vue";
-  import {ColumnOptions, TableData} from "./types";
+  import {ColStyleWithCls, ColumnOptions, TableData} from "./types";
   import {tableRowKey} from "./helper";
 
   export default defineComponent({
@@ -27,6 +31,10 @@
       rowKey: {
         type: String,
         required: true
+      },
+      colStyleWidthCls: {
+        type: Object as PropType<Partial<ColStyleWithCls>[]>,
+        default: () => []
       },
     },
     setup() {

@@ -1,12 +1,12 @@
 <template>
-  <div class="ant-table-wrap" ref="tableRootHtml">
+  <div :class="rootCls" ref="tableRootHtml">
     <div class="ant-tables">
       <div class="ant-table-section sec-head" :style="hfStyle" v-if="separateHeight">
         <table class="ant-table" cellspacing="0" :style="{ width: tableWidth + 'px' }">
           <colgroup>
             <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
           </colgroup>
-          <a-thead :columns="columns" />
+          <a-thead :col-style-width-cls="colStyleWidthCls" :columns="columns" />
         </table>
       </div>
 
@@ -16,8 +16,8 @@
          <colgroup>
             <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
           </colgroup>
-          <a-thead :columns="columns" v-if="!separateHeight" />
-          <a-tbody :columns="columns" :data="tableData" :row-key="rowKey" />
+          <a-thead :columns="columns" :col-style-width-cls="colStyleWidthCls" v-if="!separateHeight" />
+          <a-tbody :columns="columns" :col-style-width-cls="colStyleWidthCls" :data="tableData" :row-key="rowKey" />
         </table>
       </div>
       
@@ -27,12 +27,15 @@
 
 <script lang="ts">
   import { computed, defineComponent, nextTick, onMounted, PropType, ref, watch } from 'vue';
-  import { ColumnOptions, TableData, TableSectionEls } from './types';
+  import { ColStyleWithCls, ColumnOptions, TableData, TableSectionEls } from './types';
   import AThead from './thead.vue';
   import ATbody from './tbody.vue';
-  import { partition, sumBy } from 'lodash';
-  import { tableRowKey } from './helper';
+  import { findIndex, findLastIndex, partition, sumBy } from 'lodash-es';
+  import { getColStyle, tableRowKey } from './helper';
   import ScrollServe, {IsReachBoundary} from './scroll';
+
+  const baseCls = 'ant-table-wrap';
+  const scrollBaseCls = 'scroll-position-';
 
   export default defineComponent({
     name: "ATable",
@@ -105,11 +108,28 @@
         }
       }
 
+      const rootCls = ref(`${baseCls} ${scrollBaseCls + 'left'}`);
+
+      // 横向滚动条是否到[左, 右]边界
+      const scrollBoundary = ref<IsReachBoundary>([true, false]);
+
+      const updateScrollBoundary = (state: IsReachBoundary) => {
+      for (let a = 0; a < state.length; a++) {
+        if (state[a] !== scrollBoundary.value[a]) {
+          scrollBoundary.value = state;
+          const boundary = state[0] ? 'left' : state[1] ? 'right' : 'middle';
+          rootCls.value = `${baseCls} ${scrollBaseCls + boundary}`;
+          break;
+        }
+      }
+    }
+
       const handleBodyScroll = (event: Event) => {
         const target = event.target as HTMLElement;
         const direction = ScrollServe.getDirection(target);
         if (direction === 'horizontal') {
           const headSec = tableRootHtml.value?.querySelector('.sec-head') as HTMLElement;
+          updateScrollBoundary(ScrollServe.hasReachBoundary(target, direction));
           if (headSec) {
             ScrollServe.setScroll(headSec, target.scrollLeft, false);
           }
@@ -136,6 +156,24 @@
         return result;
       });
 
+      const colStyleWidthCls = computed<Partial<ColStyleWithCls>[]>(() => {
+        const base = 'table-cell';
+        const leftEdgeFixedIndex = findLastIndex(props.columns, { fixed: 'left' });
+        const rightEdgeFixedIndex = findIndex(props.columns, { fixed: 'right' });
+        return props.columns.map((col, index) => {
+          let style = {};
+          let cls = base;
+          if (col.fixed) {
+            cls += ' fixed';
+            style = getColStyle(props.columns, index, tableWidth.value);
+            if (index === leftEdgeFixedIndex || index === rightEdgeFixedIndex) {
+              cls += ' fixed-' + col.fixed;
+            }
+          }
+          return { style, cls }
+        })
+      });
+
 
       const init = async () => {
         tableData.value = props.data;
@@ -158,6 +196,8 @@
         tableRootHtml,
         tableRowKey,
         handleBodyScroll,
+        colStyleWidthCls,
+        rootCls,
       }
     }
   });
