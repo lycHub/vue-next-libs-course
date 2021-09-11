@@ -6,7 +6,9 @@
      v-for="(col, cIndex) of columns"
      :key="tableRowKey(col, cIndex)"
      :style="colStyleWidthCls[cIndex].style">
-      <span class="cell-text">{{ row[col['key']] }}</span>
+      <render-cell v-if="col.render" :render-func="col.render" :column="col" :index="index" :data="row" />
+      <render-slot v-else-if="col.slot" :column="col" :data="row" :index="index" />
+      <span class="cell-text" v-else>{{ row[col['key']] }}</span>
     </td>
   </tr>
   </tbody>
@@ -16,10 +18,13 @@
   import {defineComponent, PropType, ref} from "vue";
   import {ColStyleWithCls, ColumnOptions, TableData} from "./types";
   import {tableRowKey} from "./helper";
-import { getClickType } from "../utils";
+  import { getClickType } from "../utils";
+  import RenderCell from "./render";
+  import RenderSlot from "./slot";
 
   export default defineComponent({
     name: "ATbody",
+    components: { RenderCell, RenderSlot },
     props: {
       columns: {
         type: Array as PropType<ColumnOptions[]>,

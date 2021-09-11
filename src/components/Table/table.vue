@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, nextTick, onMounted, PropType, ref, watch } from 'vue';
+  import { computed, defineComponent, nextTick, onMounted, PropType, provide, ref, watch } from 'vue';
   import { ColStyleWithCls, ColumnOptions, SelectedRow, SelectMode, TableData, TableSectionEls } from './types';
   import AThead from './thead.vue';
   import ATbody from './tbody.vue';
@@ -40,6 +40,8 @@
   import { getColStyle, tableRowKey } from './helper';
   import ScrollServe, {IsReachBoundary} from './scroll';
   import SelectRowStrategies from './select-row-strategies';
+import { TableRootKey } from './injections';
+import { WrapWithUndefined } from '../utils/types';
 
   const baseCls = 'ant-table-wrap';
   const scrollBaseCls = 'scroll-position-';
@@ -72,7 +74,7 @@
         default: ''
       }
     },
-    setup(props) {
+    setup(props, { slots }) {
       const tableData = ref<TableData[]>([]);
       const tableRootHtml = ref<HTMLElement | undefined>();
       const separateHeight = ref(false);
@@ -191,7 +193,6 @@
       const handleRowClick = (row: SelectedRow) => {
         if (props.selectMode === 'row') {
           SelectRowStrategies[row.clickType](row, selectedRowIndexes);
-          console.log('selectedRowIndexes :>> ', selectedRowIndexes.value);
         }
       }
 
@@ -207,6 +208,12 @@
       });
       watch(() => props.data, () => {
         init();
+      });
+
+      provide(TableRootKey, {
+        rowKey: props.rowKey,
+        selectMode: props.selectMode,
+        slots
       });
       return {
         tableData,
