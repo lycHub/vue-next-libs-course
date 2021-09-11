@@ -20,4 +20,5 @@ function getColStyle(columns: ColumnOptions[], index: number, tableWidth: number
   return result;
 }
 
+
 export { tableRowKey, getColStyle }

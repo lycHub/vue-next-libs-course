@@ -1,5 +1,6 @@
 import { CSSProperties } from '@vue/runtime-dom';
 import { PositionProperty } from 'csstype';
+import { ClickType } from '../utils/types';
 
 type ScrollDirection = 'horizontal' | 'vertical';
 type FixTypes = 'left' | 'right';
@@ -45,8 +46,6 @@ interface ColStyleWithCls extends CSSProperties {
   cls: string;
 }
 
-type ClickType = 'single' | 'ctrl' | 'shift';
-
 interface SelectedRow {
   index: number;
   clickType: ClickType;
@@ -58,4 +57,4 @@ interface TableSectionEls {
   foot: HTMLElement;
 }
 
-export { ScrollDirection, TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ClickType, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { ScrollDirection, TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

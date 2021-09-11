@@ -1,6 +1,6 @@
 <template>
   <div class="demo-box" style="margin-top: 100px;">
-    <a-table :columns="columns" :data="data" row-key="id" :max-height="300" />
+    <a-table select-mode="row" :columns="columns" :data="data" row-key="id" :max-height="300" />
   </div>
 </template>
 
@@ -22,15 +22,13 @@
           {
             title: 'Name',
             key: 'name',
-            width: 200,
-            fixed: 'left'
+            width: 200
           },
           {
             title: 'Age',
             key: 'age',
             slot: 'age',
-            width: 100,
-            fixed: 'left'
+            width: 100
           },
           {
             title: 'Province',
@@ -50,14 +48,12 @@
           {
             title: 'Postcode',
             key: 'zip',
-            width: 200,
-            fixed: 'right',
+            width: 200
           },
           {
             title: 'Action',
             key: 'action',
-            width: 200,
-            fixed: 'right',
+            width: 200
           }
         ]
       }

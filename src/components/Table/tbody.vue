@@ -1,6 +1,6 @@
 <template>
   <tbody class="table-body" align="center">
-  <tr class="table-row" v-for="(row, index) of data" :key="row[rowKey]">
+  <tr :class="tableRowCls(index)" v-for="(row, index) of data" :key="row[rowKey]" @click="clickRow($event, index)">
     <td
     :class="colStyleWidthCls[cIndex].cls"
      v-for="(col, cIndex) of columns"
@@ -16,6 +16,7 @@
   import {defineComponent, PropType, ref} from "vue";
   import {ColStyleWithCls, ColumnOptions, TableData} from "./types";
   import {tableRowKey} from "./helper";
+import { getClickType } from "../utils";
 
   export default defineComponent({
     name: "ATbody",
@@ -36,10 +37,25 @@
         type: Object as PropType<Partial<ColStyleWithCls>[]>,
         default: () => []
       },
+      selectIndexes: {
+        type: Array as PropType<number[]>,
+        default: () => []
+      },
     },
-    setup() {
+    emits: ['rowClick'],
+    setup(props, { emit }) {
+      const tableRowCls = (index: number): string => {
+        const selected = props.selectIndexes.findIndex(item => item === index) > -1;
+        return `table-row ${ selected ? 'selected' : '' }`;
+      };
+      const clickRow = (event: MouseEvent, index: number) => {
+        const clickType = getClickType(event);
+        emit('rowClick', { index, clickType });
+      }
       return {
-        tableRowKey
+        tableRowKey,
+        clickRow,
+        tableRowCls
       }
     }
   });

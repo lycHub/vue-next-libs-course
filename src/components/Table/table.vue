@@ -17,7 +17,13 @@
             <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
           </colgroup>
           <a-thead :columns="columns" :col-style-width-cls="colStyleWidthCls" v-if="!separateHeight" />
-          <a-tbody :columns="columns" :col-style-width-cls="colStyleWidthCls" :data="tableData" :row-key="rowKey" />
+          <a-tbody
+          :columns="columns"
+          :col-style-width-cls="colStyleWidthCls"
+          :data="tableData"
+          :row-key="rowKey"
+          :select-indexes="selectedRowIndexes"
+          @row-click="handleRowClick"/>
         </table>
       </div>
       
@@ -27,12 +33,13 @@
 
 <script lang="ts">
   import { computed, defineComponent, nextTick, onMounted, PropType, ref, watch } from 'vue';
-  import { ColStyleWithCls, ColumnOptions, TableData, TableSectionEls } from './types';
+  import { ColStyleWithCls, ColumnOptions, SelectedRow, SelectMode, TableData, TableSectionEls } from './types';
   import AThead from './thead.vue';
   import ATbody from './tbody.vue';
   import { findIndex, findLastIndex, partition, sumBy } from 'lodash-es';
   import { getColStyle, tableRowKey } from './helper';
   import ScrollServe, {IsReachBoundary} from './scroll';
+  import SelectRowStrategies from './select-row-strategies';
 
   const baseCls = 'ant-table-wrap';
   const scrollBaseCls = 'scroll-position-';
@@ -57,6 +64,13 @@
         type: Number,
         default: 0
       },
+      selectMode: {
+        type: String,
+        validaor: (value: string) => {
+          return value ? ['row', 'cell'].find(item => item === value) : true;
+        },
+        default: ''
+      }
     },
     setup(props) {
       const tableData = ref<TableData[]>([]);
@@ -173,6 +187,12 @@
           return { style, cls }
         })
       });
+      const selectedRowIndexes = ref<number[]>([]);
+      const handleRowClick = (row: SelectedRow) => {
+        if (props.selectMode === 'row') {
+          SelectRowStrategies[row.clickType](row, selectedRowIndexes);
+        }
+      }
 
 
       const init = async () => {
@@ -198,6 +218,8 @@
         handleBodyScroll,
         colStyleWidthCls,
         rootCls,
+        handleRowClick,
+        selectedRowIndexes,
       }
     }
   });
