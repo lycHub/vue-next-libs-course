@@ -191,6 +191,7 @@
       const handleRowClick = (row: SelectedRow) => {
         if (props.selectMode === 'row') {
           SelectRowStrategies[row.clickType](row, selectedRowIndexes);
+          console.log('selectedRowIndexes :>> ', selectedRowIndexes.value);
         }
       }
 
