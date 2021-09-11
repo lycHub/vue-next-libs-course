@@ -1,6 +1,6 @@
 <template>
   <div class="demo-box" style="margin-top: 100px;">
-    <a-table select-mode="row" :columns="columns" :data="data" row-key="id" :max-height="300">
+    <a-table select-mode="cell" :columns="columns" :data="data" row-key="id" :max-height="300">
       <template #city="{ data }">
         <b style="color: green;">abc--{{ data.city }}</b>
       </template>

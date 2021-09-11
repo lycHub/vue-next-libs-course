@@ -2,10 +2,10 @@
   <thead class="table-head">
   <tr class="table-row">
     <th
-    :class="colStyleWidthCls[index].cls"
+    :class="colStyleWithCls[index].cls"
     v-for="(col, index) of columns"
     :key="tableRowKey(col, index)"
-    :style="colStyleWidthCls[index].style">
+    :style="colStyleWithCls[index].style">
       <render-cell v-if="col.renderHeader" :render-func="col.renderHeader" :column="col" :index="index" />
       <span class="cell-text" v-else>{{ col.title }}</span>
     </th>
@@ -27,7 +27,7 @@
         type: Array as PropType<ColumnOptions[]>,
         default: () => []
       },
-      colStyleWidthCls: {
+      colStyleWithCls: {
         type: Object as PropType<Partial<ColStyleWithCls>[]>,
         default: () => []
       },

@@ -1,15 +1,14 @@
 <template>
   <tbody class="table-body" align="center">
   <tr :class="tableRowCls(index)" v-for="(row, index) of data" :key="row[rowKey]" @click="clickRow($event, index)">
-    <td
-    :class="colStyleWidthCls[cIndex].cls"
-     v-for="(col, cIndex) of columns"
-     :key="tableRowKey(col, cIndex)"
-     :style="colStyleWidthCls[cIndex].style">
-      <render-cell v-if="col.render" :render-func="col.render" :column="col" :index="index" :data="row" />
-      <render-slot v-else-if="col.slot" :column="col" :data="row" :index="index" />
-      <span class="cell-text" v-else>{{ row[col['key']] }}</span>
-    </td>
+    <cell
+      v-for="(col, cIndex) of columns"
+      :key="col.title || cIndex"
+      :columns="columns"
+      :col-style-with-cls="colStyleWithCls"
+      :data="row"
+      :col-index="cIndex"
+      :index="index" />
   </tr>
   </tbody>
 </template>
@@ -21,10 +20,11 @@
   import { getClickType } from "../utils";
   import RenderCell from "./render";
   import RenderSlot from "./slot";
+  import Cell from './cell.vue';
 
   export default defineComponent({
     name: "ATbody",
-    components: { RenderCell, RenderSlot },
+    components: { RenderCell, RenderSlot, Cell },
     props: {
       columns: {
         type: Array as PropType<ColumnOptions[]>,
@@ -38,8 +38,8 @@
         type: String,
         required: true
       },
-      colStyleWidthCls: {
-        type: Object as PropType<Partial<ColStyleWithCls>[]>,
+      colStyleWithCls: {
+        type: Array as PropType<Partial<ColStyleWithCls>[]>,
         default: () => []
       },
       selectIndexes: {

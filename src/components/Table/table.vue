@@ -6,7 +6,7 @@
           <colgroup>
             <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
           </colgroup>
-          <a-thead :col-style-width-cls="colStyleWidthCls" :columns="columns" />
+          <a-thead :col-style-with-cls="colStyleWithCls" :columns="columns" />
         </table>
       </div>
 
@@ -16,10 +16,10 @@
          <colgroup>
             <col v-for="(col, index) of columns" :key="tableRowKey(col, index)" :width="col.width" />
           </colgroup>
-          <a-thead :columns="columns" :col-style-width-cls="colStyleWidthCls" v-if="!separateHeight" />
+          <a-thead :columns="columns" :col-style-with-cls="colStyleWithCls" v-if="!separateHeight" />
           <a-tbody
           :columns="columns"
-          :col-style-width-cls="colStyleWidthCls"
+          :col-style-with-cls="colStyleWithCls"
           :data="tableData"
           :row-key="rowKey"
           :select-indexes="selectedRowIndexes"
@@ -32,16 +32,16 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, nextTick, onMounted, PropType, provide, ref, watch } from 'vue';
-  import { ColStyleWithCls, ColumnOptions, SelectedRow, SelectMode, TableData, TableSectionEls } from './types';
+  import { computed, CSSProperties, defineComponent, nextTick, onMounted, PropType, provide, ref, watch } from 'vue';
+  import { CellCoordinate, ColStyleWithCls, ColumnOptions, SelectedRow, SelectMode, TableData, TableSectionEls, UserSelectProperty } from './types';
   import AThead from './thead.vue';
   import ATbody from './tbody.vue';
   import { findIndex, findLastIndex, partition, sumBy } from 'lodash-es';
-  import { getColStyle, tableRowKey } from './helper';
+  import { getColStyle, getSelectedCellIndex, tableRowKey } from './helper';
   import ScrollServe, {IsReachBoundary} from './scroll';
   import SelectRowStrategies from './select-row-strategies';
-import { TableRootKey } from './injections';
-import { WrapWithUndefined } from '../utils/types';
+  import { TableRootKey } from './injections';
+  import { getClickType } from '../utils';
 
   const baseCls = 'ant-table-wrap';
   const scrollBaseCls = 'scroll-position-';
@@ -76,7 +76,7 @@ import { WrapWithUndefined } from '../utils/types';
     },
     setup(props, { slots }) {
       const tableData = ref<TableData[]>([]);
-      const tableRootHtml = ref<HTMLElement | undefined>();
+      const tableRootHtml = ref<HTMLElement>();
       const separateHeight = ref(false);
       const tableWidth = ref(0);
 
@@ -161,18 +161,26 @@ import { WrapWithUndefined } from '../utils/types';
         }
         return result;
       });
-      const bodyStyle = computed(() => {
+      const bodyStyle = computed<CSSProperties>(() => {
         const result: {
           overflow: string;
+          cursor: string;
+          userSelect: UserSelectProperty;
           maxHeight?: string;
-        } = { overflow: 'auto' };
+        } = { overflow: 'auto', cursor: 'auto', userSelect: 'auto' };
         if (separateHeight.value) {
           result.maxHeight = props.maxHeight + 'px';
+        }
+        if (props.selectMode) {
+          result.cursor = 'pointer';
+        }
+        if (moving.value) {
+          result.userSelect = 'none';
         }
         return result;
       });
 
-      const colStyleWidthCls = computed<Partial<ColStyleWithCls>[]>(() => {
+      const colStyleWithCls = computed<Partial<ColStyleWithCls>[]>(() => {
         const base = 'table-cell';
         const leftEdgeFixedIndex = findLastIndex(props.columns, { fixed: 'left' });
         const rightEdgeFixedIndex = findIndex(props.columns, { fixed: 'right' });
@@ -196,6 +204,115 @@ import { WrapWithUndefined } from '../utils/types';
         }
       }
 
+      // 保存选中单元格的坐标(起点和终点)
+      const selectedCellCoordinates = ref<CellCoordinate[]>([]);
+
+      // 保存起点和重点范围内，被选中的单元格坐标
+      const selectedCellCoordinatesInRange = ref<CellCoordinate[]>([]);
+
+
+    const addCellCoordinatesInRange = (coordinate: CellCoordinate) => {
+      selectedCellCoordinatesInRange.value.push(coordinate);
+    }
+
+    const handleTableCellClick = (coordinate: CellCoordinate, event: MouseEvent) => {
+      if (props.selectMode !== 'cell' || moving.value) return;
+      event.stopPropagation();
+      const clickType = getClickType(event);
+      const targetIndexOfSelectedCells = getSelectedCellIndex(selectedCellCoordinates.value, coordinate.x, coordinate.y);
+    
+      const targetIndexOfSelectedInRangeCells = getSelectedCellIndex(selectedCellCoordinatesInRange.value, coordinate.x, coordinate.y);
+      
+      const startCellIndex = selectedCellCoordinates.value.findIndex(item => item.isStart) ?? selectedCellCoordinatesInRange.value.findIndex(item => item.isStart);
+      const startCell = selectedCellCoordinates.value[startCellIndex] || selectedCellCoordinatesInRange.value[startCellIndex];
+      const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+  
+  
+      switch (clickType) {
+        case 'ctrl':
+          if (selectedCellCoordinates.value.length || selectedCellCoordinatesInRange.value.length) {
+            if (startCell) {
+              Reflect.deleteProperty(startCell, 'isStart');
+            }
+            if (endCellIndex > -1) {
+              Reflect.deleteProperty(selectedCellCoordinates.value[endCellIndex], 'isEnd');
+            }
+            if (selectedCellCoordinates.value[targetIndexOfSelectedCells]?.inRange) {
+              selectedCellCoordinates.value[targetIndexOfSelectedCells].isStart = true;
+              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
+            } else if (selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells]?.inRange) {
+              selectedCellCoordinatesInRange.value[targetIndexOfSelectedInRangeCells].isStart = true;
+              selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.slice();
+            } else {
+              selectedCellCoordinates.value.push(coordinate);
+            }
+          } else {
+            selectedCellCoordinates.value = [coordinate];
+          }
+          break;
+        case 'shift':
+          if (selectedCellCoordinates.value.length) {
+            // 把所有inRange清空但起点要保留，不然无法生成新的范围
+            selectedCellCoordinatesInRange.value = selectedCellCoordinatesInRange.value.filter(item => item.isStart);
+            selectedCellCoordinates.value = selectedCellCoordinates.value.filter(item => !item.inRange || item.isStart);
+            if (!startCell && selectedCellCoordinates.value.length) {
+              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].isStart = true;
+              selectedCellCoordinates.value[selectedCellCoordinates.value.length - 1].inRange = true;
+              selectedCellCoordinates.value = selectedCellCoordinates.value.slice();
+            }
+            if (endCellIndex > -1) {
+              selectedCellCoordinates.value.splice(endCellIndex, 1);
+            }
+            
+            if (targetIndexOfSelectedCells > -1 && targetIndexOfSelectedCells !== startCellIndex) {
+              // 直接改.isEnd  不会触发响应式
+              selectedCellCoordinates.value[targetIndexOfSelectedCells] = { ...coordinate, isEnd: true, inRange: true };
+            } else {
+              selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
+            }
+            getSelection()!.removeAllRanges();
+          } else {
+            selectedCellCoordinates.value = [coordinate];
+          }
+          break;
+        default:
+          selectedCellCoordinatesInRange.value = [];
+          if (selectedCellCoordinates.value.length === 1 && targetIndexOfSelectedCells === 0) {
+            selectedCellCoordinates.value = [];
+          } else {
+            selectedCellCoordinates.value = [coordinate];
+          }
+          break;
+      }
+      // console.log('selectedCellCoordinates', selectedCellCoordinates);
+    }
+    const mousedownStartCoordinate = ref<CellCoordinate>();
+    const moving = ref(false);
+    const handleCellMouseenter = (coordinate: CellCoordinate) => {
+      if (moving.value) {
+        if (mousedownStartCoordinate.value && coordinate) {
+          selectedCellCoordinatesInRange.value = [];
+          selectedCellCoordinates.value = [];
+          selectedCellCoordinates.value = [{ ...mousedownStartCoordinate.value, isStart: true, inRange: true }];
+          const endCellIndex = selectedCellCoordinates.value.findIndex(item => item.isEnd);
+          if (endCellIndex > -1) {
+            selectedCellCoordinates.value.splice(endCellIndex, 1);
+          }
+          selectedCellCoordinates.value.push({ ...coordinate, isEnd: true, inRange: true });
+        }
+      }
+    }
+
+    const handleMouseup = () => {
+      moving.value = false;
+      mousedownStartCoordinate.value = undefined;
+    }
+
+    const handleCellMousedown = (coordinate: CellCoordinate) => {
+      moving.value = true;
+      mousedownStartCoordinate.value = coordinate;
+      addEventListener('mouseup', handleMouseup);
+    }
 
       const init = async () => {
         tableData.value = props.data;
@@ -213,7 +330,12 @@ import { WrapWithUndefined } from '../utils/types';
       provide(TableRootKey, {
         rowKey: props.rowKey,
         selectMode: props.selectMode,
-        slots
+        slots,
+        highCells: computed(() => selectedCellCoordinates.value.concat(selectedCellCoordinatesInRange.value)),
+        handleTableCellClick,
+        handleCellMousedown,
+        handleCellMouseenter,
+        addCellCoordinatesInRange,
       });
       return {
         tableData,
@@ -224,7 +346,7 @@ import { WrapWithUndefined } from '../utils/types';
         tableRootHtml,
         tableRowKey,
         handleBodyScroll,
-        colStyleWidthCls,
+        colStyleWithCls,
         rootCls,
         handleRowClick,
         selectedRowIndexes,

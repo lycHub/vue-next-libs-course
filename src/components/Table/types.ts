@@ -2,6 +2,8 @@ import { CSSProperties } from '@vue/runtime-dom';
 import { PositionProperty } from 'csstype';
 import { ClickType } from '../utils/types';
 
+type UserSelectProperty = "-moz-none" | "all" | "auto" | "contain" | "element" | "none" | "text";
+
 type ScrollDirection = 'horizontal' | 'vertical';
 type FixTypes = 'left' | 'right';
 type SelectMode = 'row' | 'cell';
@@ -57,4 +59,4 @@ interface TableSectionEls {
   foot: HTMLElement;
 }
 
-export { ScrollDirection, TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };
+export { ScrollDirection, UserSelectProperty, TableDataOfSelected, TableSectionEls, ScrollPosition, Coordinate, CellCoordinate, SelectedRow, ColumnOptions, TableData, TableStyle, ColStyle, ColStyleWithCls, TableRenderFunc, TableRenderFuncParams, FixTypes, SelectMode };

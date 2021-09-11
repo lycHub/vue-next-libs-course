@@ -1,5 +1,5 @@
-import {ColStyle, ColumnOptions} from "./types";
-import { sumBy } from 'lodash-es';
+import {CellCoordinate, ColStyle, ColumnOptions, TableDataOfSelected} from "./types";
+import { orderBy, sumBy } from 'lodash-es';
 
 function tableRowKey(col: ColumnOptions, index: number): string | number {
   return col.key || col.title || index;
@@ -20,5 +20,14 @@ function getColStyle(columns: ColumnOptions[], index: number, tableWidth: number
   return result;
 }
 
+function getSelectedCellIndex(selectedCells: TableDataOfSelected[], x: number, y: number): number {
+  return selectedCells.findIndex(item => item.x === x && item.y === y);
+}
 
-export { tableRowKey, getColStyle }
+function isInRangeOfCoordinates(range: [CellCoordinate, CellCoordinate], target: CellCoordinate): boolean {
+  const rowRange = orderBy([range[0].x, range[1].x]);
+  const colRange = orderBy([range[0].y, range[1].y]);
+  return (target.x >= rowRange[0] && target.x <= rowRange[1]) && (target.y >= colRange[0] && target.y <= colRange[1]);
+}
+
+export { tableRowKey, getColStyle, getSelectedCellIndex, isInRangeOfCoordinates }
